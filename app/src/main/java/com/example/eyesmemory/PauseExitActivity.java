@@ -44,11 +44,11 @@ public class PauseExitActivity extends AppCompatActivity {
     private void restartGame() {
         isResuming = false;
         Intent intent = new Intent();
-        heartCount = 3;  // Reset heart count to 3
-        questionCount = 0;  // Optionally reset question count if you want to start fresh
+        heartCount = 3;
+        questionCount = 0;
         intent.putExtra("isResuming", isResuming);
-        intent.putExtra("heartCount", heartCount);  // Pass back updated heart count
-        intent.putExtra("questionCount", questionCount);  // Pass back updated question count if needed
+        intent.putExtra("heartCount", heartCount);
+        intent.putExtra("questionCount", questionCount);
         setResult(RESULT_OK, intent);
         finish();
     }
