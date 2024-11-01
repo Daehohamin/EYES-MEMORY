@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 remainingTime = data.getLongExtra("remainingTime", 60000);
                 heartCount = data.getIntExtra("heartCount", heartCount);
                 questionCount = data.getIntExtra("questionCount", questionCount);
-                updateHearts(); // Update heart UI when resuming
+                updateHearts();
                 startTimer(remainingTime);
             } else {
                 heartCount = 3;
