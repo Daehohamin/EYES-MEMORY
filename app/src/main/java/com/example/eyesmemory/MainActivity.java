@@ -1,135 +1,213 @@
 package com.example.eyesmemory;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView textView;
-    private LinearLayout blueButton, redButton, blackButton;
-    private ImageView heart1, heart2, heart3;
-    private int correctCount = 0;
+    private TextView changeText, timeView;
+    private ImageView leftHeart, middleHeart, rightHeart;
     private int heartCount = 3;
-    private int currentRound = 0;
-    private final int totalRounds = 10;
-    private int score = 0;
-    private final Random random = new Random();
-    private String[] colors = {"검정", "빨강", "파랑"};
+    private int questionCount = 0;
     private String correctColor;
+    private CountDownTimer countDownTimer;
+    private long remainingTime = 60000; // 초기 타이머 값 (1분)
+
+    private String[] colorNames = {"검정", "빨강", "파랑", "초록", "노랑", "주황", "자주", "하늘"};
+    private int[] colorValues = {
+            Color.BLACK,                // 검정
+            Color.RED,                  // 빨강
+            Color.BLUE,                 // 파랑
+            Color.GREEN,                // 초록
+            Color.YELLOW,               // 노랑
+            Color.rgb(255, 165, 0),    // 주황 (Orange)
+            Color.MAGENTA,              // 자주
+            Color.CYAN                  // 하늘 (Cyan)
+    };
+
+    private ImageButton colorButton1, colorButton2, colorButton3, pauseButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView = findViewById(R.id.change_text);
-        blueButton = findViewById(R.id.blue_button);
-        redButton = findViewById(R.id.red_button);
-        blackButton = findViewById(R.id.black_button);
-        heart1 = findViewById(R.id.left_heart);
-        heart2 = findViewById(R.id.middle_heart);
-        heart3 = findViewById(R.id.right_heart);
+        changeText = findViewById(R.id.change_text);
+        timeView = findViewById(R.id.time_view);
+        leftHeart = findViewById(R.id.left_heart);
+        middleHeart = findViewById(R.id.middle_heart);
+        rightHeart = findViewById(R.id.right_heart);
+        colorButton1 = findViewById(R.id.button_left);
+        colorButton2 = findViewById(R.id.button_middle);
+        colorButton3 = findViewById(R.id.button_right);
+        pauseButton = findViewById(R.id.pause_button);
 
         startGame();
+        startTimer(remainingTime);
 
-        blueButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkAnswer("파랑");
-            }
-        });
-
-        redButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkAnswer("빨강");
-            }
-        });
-
-        blackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkAnswer("검정");
-            }
-        });
+        colorButton1.setOnClickListener(v -> checkAnswer((String) colorButton1.getTag()));
+        colorButton2.setOnClickListener(v -> checkAnswer((String) colorButton2.getTag()));
+        colorButton3.setOnClickListener(v -> checkAnswer((String) colorButton3.getTag()));
+        pauseButton.setOnClickListener(v -> showPauseScreen());
     }
 
     private void startGame() {
-        nextRound();
-    }
-
-    private void nextRound() {
-        if (currentRound < totalRounds) {
-            currentRound++;
+        if (questionCount < 10 && heartCount > 0) {
             generateQuestion();
         } else {
-            endGame();
+            showEndDialog("게임 성공!\n+300p");
         }
+    }
+
+    private void startTimer(long timeInMillis) {
+        countDownTimer = new CountDownTimer(timeInMillis, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                remainingTime = millisUntilFinished;
+                timeView.setText(millisUntilFinished / 1000 + "초");
+            }
+            @Override
+            public void onFinish() {
+                showEndDialog("시간 초과!");
+            }
+        }.start();
     }
 
     private void generateQuestion() {
-        int randomColorIndex = random.nextInt(3); // 0 ~ 2
-        int randomTextColorIndex = random.nextInt(3);
+        Random random = new Random();
 
-        correctColor = colors[randomColorIndex];
-        textView.setText(colors[randomColorIndex]);
+        // Step 1: Randomly select three unique color indices
+        int[] selectedIndices = new int[3];
+        for (int i = 0; i < 3; i++) {
+            int index;
+            do {
+                index = random.nextInt(colorNames.length);
+            } while (contains(selectedIndices, index)); // 중복되지 않도록 검사
+            selectedIndices[i] = index;
+        }
 
-        // 색상 변경
-        switch (colors[randomTextColorIndex]) {
-            case "검정":
-                textView.setTextColor(getResources().getColor(R.color.black));
-                break;
-            case "빨강":
-                textView.setTextColor(getResources().getColor(R.color.red));
-                break;
-            case "파랑":
-                textView.setTextColor(getResources().getColor(R.color.blue));
-                break;
+        // Step 2: Randomly select one of the three for the text (정답)
+        int textIndex = random.nextInt(3);
+
+        // changeText에 텍스트 설정
+        changeText.setText(colorNames[selectedIndices[textIndex]]);
+
+        // Step 3: 정답의 색상은 selectedIndices의 나머지 색상 중 하나로 설정
+        int colorIndex = (textIndex + 1 + random.nextInt(2)) % 3; // 나머지 색 중 하나 선택
+        changeText.setTextColor(colorValues[selectedIndices[colorIndex]]);
+
+        // 정답 색상 저장
+        correctColor = colorNames[selectedIndices[textIndex]];
+
+        // Step 4: 버튼 색상 설정
+        for (int i = 0; i < 3; i++) {
+            ImageButton button = (i == 0) ? colorButton1 : (i == 1) ? colorButton2 : colorButton3;
+            setButtonColor(button, selectedIndices[i]); // 버튼에 색상 설정
+            button.setTag(colorNames[selectedIndices[i]]); // 태그 설정
         }
     }
 
-    private void checkAnswer(String selectedColor) {
-        if (selectedColor.equals(correctColor)) {
-            correctCount++;
+    // Helper method to check if the array contains a specific index
+    private boolean contains(int[] array, int value) {
+        for (int index : array) {
+            if (index == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void setButtonColor(ImageButton button, int colorIndex) {
+        button.setBackgroundColor(colorValues[colorIndex]);
+        button.setTag(colorNames[colorIndex]);
+    }
+
+    private void checkAnswer(String color) {
+        if (correctColor.equals(color)) {
+            questionCount++;
+            startGame();
         } else {
-            decreaseHeart();
-        }
-
-        if (heartCount > 0) {
-            nextRound();
-        } else {
-            endGame();
+            heartCount--;
+            updateHearts();
+            if (heartCount == 0) {
+                showEndDialog("하트가 모두 소진되었습니다.");
+            }
         }
     }
 
-    private void decreaseHeart() {
-        heartCount--;
-        switch (heartCount) {
-            case 2:
-                heart3.setVisibility(View.INVISIBLE);
-                break;
-            case 1:
-                heart2.setVisibility(View.INVISIBLE);
-                break;
-            case 0:
-                heart1.setVisibility(View.INVISIBLE);
-                break;
+    private void updateHearts() {
+        leftHeart.setVisibility(View.VISIBLE);
+        middleHeart.setVisibility(View.VISIBLE);
+        rightHeart.setVisibility(View.VISIBLE);
+        if (heartCount == 2) {
+            rightHeart.setVisibility(View.INVISIBLE);
+        } else if (heartCount == 1) {
+            rightHeart.setVisibility(View.INVISIBLE);
+            middleHeart.setVisibility(View.INVISIBLE);
+        } else if (heartCount == 0) {
+            rightHeart.setVisibility(View.INVISIBLE);
+            middleHeart.setVisibility(View.INVISIBLE);
+            leftHeart.setVisibility(View.INVISIBLE);
         }
     }
 
-    private void endGame() {
-        if (heartCount > 0) {
-            score = 300;
-            Toast.makeText(this, "게임 성공! 점수: " + score, Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "게임 오버!", Toast.LENGTH_LONG).show();
+    private void showEndDialog(String message) {
+        if (countDownTimer != null) countDownTimer.cancel();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setPositiveButton("다시 시작", (dialog, which) -> {
+                    heartCount = 3;  // Reset heart count to 3
+                    questionCount = 0;  // Reset question count
+                    updateHearts();  // Update heart UI to show all hearts again
+                    startGame();
+                    startTimer(60000); // Restart timer with the initial value
+                })
+                .setNegativeButton("종료", (dialog, which) -> finish())
+                .show();
+    }
+
+
+    private void showPauseScreen() {
+        if (countDownTimer != null) countDownTimer.cancel();
+        Intent intent = new Intent(this, PauseExitActivity.class);
+        intent.putExtra("remainingTime", remainingTime);
+        intent.putExtra("heartCount", heartCount);
+        intent.putExtra("questionCount", questionCount);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            boolean isResuming = data.getBooleanExtra("isResuming", false);
+            if (isResuming) {
+                remainingTime = data.getLongExtra("remainingTime", 60000);
+                heartCount = data.getIntExtra("heartCount", heartCount);
+                questionCount = data.getIntExtra("questionCount", questionCount);
+                updateHearts(); // Update heart UI when resuming
+                startTimer(remainingTime);
+            } else {
+                // Restarting the game
+                heartCount = 3;  // Reset to full hearts
+                questionCount = 0;  // Optionally reset the question count
+                updateHearts(); // Ensure the hearts are shown correctly
+                startGame();
+                startTimer(60000); // Reset timer
+            }
         }
     }
+
+
 }

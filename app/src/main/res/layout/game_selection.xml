@@ -1,7 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#FFFFFF"
     android:clipChildren="false"
     android:clipToPadding="false"
@@ -28,9 +27,7 @@
             android:clipToPadding="false"
             android:orientation="vertical">
 
-            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
+            <LinearLayout
                 android:id="@+id/point_reveal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,9 +55,7 @@
                     android:textSize="30sp" />
             </LinearLayout>
 
-            <ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
+            <ImageButton
                 android:id="@+id/chooing_select"
                 android:contentDescription="색깔 고르기 게임 창으로 가는 버튼"
                 android:layout_width="match_parent"
