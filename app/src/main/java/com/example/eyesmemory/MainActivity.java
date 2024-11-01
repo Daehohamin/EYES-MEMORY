@@ -24,16 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private long remainingTime = 60000; // 초기 타이머 값 (1분)
 
     private String[] colorNames = {"검정", "빨강", "파랑", "초록", "노랑", "주황", "자주", "하늘"};
-    private int[] colorValues = {
-            Color.BLACK,                // 검정
-            Color.RED,                  // 빨강
-            Color.BLUE,                 // 파랑
-            Color.GREEN,                // 초록
-            Color.YELLOW,               // 노랑
-            Color.rgb(255, 165, 0),    // 주황 (Orange)
-            Color.MAGENTA,              // 자주
-            Color.CYAN                  // 하늘 (Cyan)
-    };
+    private int[] colorValues = {Color.BLACK,Color.RED,Color.BLUE,Color.GREEN,Color.YELLOW,Color.rgb(255, 165, 0),Color.MAGENTA,Color.CYAN};
 
     private ImageButton colorButton1, colorButton2, colorButton3, pauseButton;
 
@@ -86,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
     private void generateQuestion() {
         Random random = new Random();
 
-        // Step 1: Randomly select three unique color indices
         int[] selectedIndices = new int[3];
         for (int i = 0; i < 3; i++) {
             int index;
@@ -96,20 +86,19 @@ public class MainActivity extends AppCompatActivity {
             selectedIndices[i] = index;
         }
 
-        // Step 2: Randomly select one of the three for the text (정답)
         int textIndex = random.nextInt(3);
 
         // changeText에 텍스트 설정
         changeText.setText(colorNames[selectedIndices[textIndex]]);
 
-        // Step 3: 정답의 색상은 selectedIndices의 나머지 색상 중 하나로 설정
+        // 정답의 색상은 selectedIndices의 나머지 색상 중 하나로 설정
         int colorIndex = (textIndex + 1 + random.nextInt(2)) % 3; // 나머지 색 중 하나 선택
         changeText.setTextColor(colorValues[selectedIndices[colorIndex]]);
 
         // 정답 색상 저장
         correctColor = colorNames[selectedIndices[textIndex]];
 
-        // Step 4: 버튼 색상 설정
+        // 버튼 색상 설정
         for (int i = 0; i < 3; i++) {
             ImageButton button = (i == 0) ? colorButton1 : (i == 1) ? colorButton2 : colorButton3;
             setButtonColor(button, selectedIndices[i]); // 버튼에 색상 설정
@@ -117,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Helper method to check if the array contains a specific index
     private boolean contains(int[] array, int value) {
         for (int index : array) {
             if (index == value) {
@@ -126,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
 
     private void setButtonColor(ImageButton button, int colorIndex) {
         button.setBackgroundColor(colorValues[colorIndex]);
@@ -167,11 +154,11 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
                 .setPositiveButton("다시 시작", (dialog, which) -> {
-                    heartCount = 3;  // Reset heart count to 3
-                    questionCount = 0;  // Reset question count
-                    updateHearts();  // Update heart UI to show all hearts again
+                    heartCount = 3;
+                    questionCount = 0;
+                    updateHearts();
                     startGame();
-                    startTimer(60000); // Restart timer with the initial value
+                    startTimer(60000);
                 })
                 .setNegativeButton("종료", (dialog, which) -> finish())
                 .show();
@@ -199,12 +186,11 @@ public class MainActivity extends AppCompatActivity {
                 updateHearts(); // Update heart UI when resuming
                 startTimer(remainingTime);
             } else {
-                // Restarting the game
-                heartCount = 3;  // Reset to full hearts
-                questionCount = 0;  // Optionally reset the question count
-                updateHearts(); // Ensure the hearts are shown correctly
+                heartCount = 3;
+                questionCount = 0;
+                updateHearts();
                 startGame();
-                startTimer(60000); // Reset timer
+                startTimer(60000);
             }
         }
     }
