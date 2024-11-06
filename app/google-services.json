@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "67368931281",
+    "project_id": "eyes-memory",
+    "storage_bucket": "eyes-memory.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67368931281:android:b9bede5404c4acc3d91af0",
+        "android_client_info": {
+          "package_name": "com.example.eyes_memory"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAioEJzpivP3a2AcaF4kQ7OEl2Is8t3Me8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
