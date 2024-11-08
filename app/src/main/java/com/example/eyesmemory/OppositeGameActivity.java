@@ -1,6 +1,7 @@
 package com.example.eyesmemory;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -10,6 +11,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +40,7 @@ public class OppositeGameActivity extends AppCompatActivity {
     private int currentWordIndex = 0;
     private static final int WORDS_PER_GAME = 9;
     private int score = 0;
-    private int lives = 3;
+    private int heartCount = 3;
     private static final int POINTS_PER_GAME = 10;
     private FirebaseFirestore db;
     private String currentUserId;
@@ -44,8 +48,9 @@ public class OppositeGameActivity extends AppCompatActivity {
     private int currentProblemIndex = 0;
     private ProgressBar timerProgressBar;
     private CountDownTimer countDownTimer;
-    private static final long GAME_DURATION = 60000; // 60 seconds
+    private long remainingTime = 60000; // 60 seconds
     private boolean isTimerPaused = false;
+    private int questionCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +69,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         updateLivesDisplay();
         displayNextWords();
         updateProblemSetHighlight();
-        startTimer(GAME_DURATION);
+        startTimer(remainingTime);
     }
 
     private void initializeViews() {
@@ -100,6 +105,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         timerProgressBar = findViewById(R.id.timerProgressBar);
     }
 
+
     private void setupClickListeners() {
         View.OnClickListener optionClickListener = this::handleOptionClick;
 
@@ -110,7 +116,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         option1Layout3.setOnClickListener(optionClickListener);
         option2Layout3.setOnClickListener(optionClickListener);
 
-        pauseButton.setOnClickListener(v -> showPauseDialog());
+        pauseButton.setOnClickListener(v -> showPauseScreen());
         faqButton.setOnClickListener(v -> showGameExplanationDialog());
     }
 
@@ -121,12 +127,38 @@ public class OppositeGameActivity extends AppCompatActivity {
         checkAnswer(selectedAnswer);
     }
 
-    private void updateLivesDisplay() {
-        life1ImageView.setVisibility(lives >= 1 ? View.VISIBLE : View.INVISIBLE);
-        life2ImageView.setVisibility(lives >= 2 ? View.VISIBLE : View.INVISIBLE);
-        life3ImageView.setVisibility(lives >= 3 ? View.VISIBLE : View.INVISIBLE);
+    private final ActivityResultLauncher<Intent> pauseResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        boolean isResuming = data.getBooleanExtra("isResuming", false);
+                        if (isResuming) {
+                            remainingTime = data.getLongExtra("remainingTime", 60000);
+                            heartCount = data.getIntExtra("heartCount", heartCount);
+                            questionCount = data.getIntExtra("questionCount", questionCount);
 
-        if (lives <= 0) {
+                            updateLivesDisplay();
+                            updateProblemSetHighlight();
+                            displayNextWords();
+
+                            startTimer(remainingTime);
+                        } else {
+                            restartGame();
+                        }
+                    }
+                }
+            }
+    );
+
+
+    private void updateLivesDisplay() {
+        life1ImageView.setVisibility(heartCount >= 1 ? View.VISIBLE : View.INVISIBLE);
+        life2ImageView.setVisibility(heartCount >= 2 ? View.VISIBLE : View.INVISIBLE);
+        life3ImageView.setVisibility(heartCount >= 3 ? View.VISIBLE : View.INVISIBLE);
+
+        if (heartCount <= 0) {
             showGameOverDialog();
         }
     }
@@ -183,6 +215,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         Collections.shuffle(options);
         option1View.setText(options.get(0));
         option2View.setText(options.get(1));
+        questionCount++;
     }
 
     private void updateProblemSetHighlight() {
@@ -212,11 +245,11 @@ public class OppositeGameActivity extends AppCompatActivity {
             score++;
             Toast.makeText(this, "정답입니다!", Toast.LENGTH_SHORT).show();
         } else {
-            lives--;
+            heartCount--;
             updateLivesDisplay();
             Toast.makeText(this, "틀렸습니다. 정답은 " + correctAnswer + "입니다.", Toast.LENGTH_SHORT).show();
 
-            if (lives <= 0) {
+            if (heartCount <= 0) {
                 showGameOverDialog();
                 return;
             }
@@ -242,36 +275,19 @@ public class OppositeGameActivity extends AppCompatActivity {
 
     private void resumeTimer() {
         if (isTimerPaused) {
-            long remainingTime = timerProgressBar.getProgress() * GAME_DURATION / 100;
-            startTimer(remainingTime);
+            long remaining_Time = timerProgressBar.getProgress() * remainingTime / 100;
+            startTimer(remaining_Time);
             isTimerPaused = false;
         }
     }
 
-    private void showPauseDialog() {
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-            isTimerPaused = true;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("게임 일시정지")
-                .setItems(new CharSequence[]{"계속하기", "나가기", "다시하기"}, (dialog, which) -> {
-                    switch (which) {
-                        case 0: // 계속하기
-                            resumeTimer();
-                            dialog.dismiss();
-                            break;
-                        case 1: // 나가기
-                            finish();
-                            break;
-                        case 2: // 다시하기
-                            restartGame();
-                            break;
-                    }
-                })
-                .setCancelable(false)
-                .show();
+    private void showPauseScreen() {
+        if (countDownTimer != null) countDownTimer.cancel();
+        Intent intent = new Intent(this, PauseExitActivity.class);
+        intent.putExtra("remainingTime", remainingTime);
+        intent.putExtra("heartCount", heartCount);
+        intent.putExtra("questionCount", questionCount);
+        pauseResultLauncher.launch(intent);
     }
 
     private void showGameExplanationDialog() {
@@ -298,7 +314,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         countDownTimer = new CountDownTimer(duration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                int progress = (int) (millisUntilFinished * 100 / GAME_DURATION);
+                int progress = (int) (millisUntilFinished * 100 / remainingTime);
                 timerProgressBar.setProgress(progress);
             }
 
@@ -356,7 +372,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         String message = "당신의 점수: " + score + "/" + wordList.size();
 
         // 모든 문제를 풀었고 생명이 남아있는 경우에만 포인트 부여
-        if (currentWordIndex >= wordList.size() && lives > 0) {
+        if (currentWordIndex >= wordList.size() && heartCount > 0) {
             earnedPoints = POINTS_PER_GAME;
             message += "\n획득한 포인트: " + earnedPoints;
             updateUserPoints(earnedPoints);
@@ -377,7 +393,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         currentWordIndex = 0;
         currentProblemIndex = 0;
         score = 0;
-        lives = 3;
+        heartCount = 3;
         updateLivesDisplay();
         selectRandomWords();
         displayNextWords();
@@ -387,7 +403,7 @@ public class OppositeGameActivity extends AppCompatActivity {
             countDownTimer.cancel();
         }
         timerProgressBar.setProgress(100);
-        startTimer(GAME_DURATION);
+        startTimer(remainingTime);
         isTimerPaused = false;
     }
 }
