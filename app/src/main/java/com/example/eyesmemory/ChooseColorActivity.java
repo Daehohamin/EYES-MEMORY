@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -17,21 +18,31 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Random;
 import android.content.res.ColorStateList;
+import android.widget.Toast;
+
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ChooseColorActivity extends AppCompatActivity {
 
     private TextView changeText, timeView;
     private ImageView leftHeart, middleHeart, rightHeart;
+    private int score = 0; // 맞힌 문제 수
     private int heartCount = 3;
     private int questionCount = 0;
     private String correctColor;
     private CountDownTimer countDownTimer;
     private long remainingTime = 60000; // 초기 타이머 값 (1분)
+    private boolean isTimerPaused = false;
+    private FirebaseFirestore db;
+    private String currentUserId;
+    private static final int POINTS_PER_GAME = 10;
 
     private String[] colorNames = {"검정", "빨강", "파랑", "초록", "노랑", "주황", "자주", "하늘"};
     private int[] colorValues = {Color.BLACK, Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.rgb(255, 165, 0), Color.MAGENTA, Color.CYAN};
 
-    private ImageButton colorButton1, colorButton2, colorButton3, pauseButton;
+    private ImageButton colorButton1, colorButton2, colorButton3, pauseButton, questionButton;
 
     private final ActivityResultLauncher<Intent> pauseResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -63,6 +74,10 @@ public class ChooseColorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_color_game);
 
+        db = FirebaseFirestore.getInstance();
+        currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("userId", "");
+        Log.d("ChooseColorActivity", "Current User ID: " + currentUserId);
+
         changeText = findViewById(R.id.change_text);
         timeView = findViewById(R.id.time_view);
         leftHeart = findViewById(R.id.left_heart);
@@ -71,7 +86,8 @@ public class ChooseColorActivity extends AppCompatActivity {
         colorButton1 = findViewById(R.id.button_left);
         colorButton2 = findViewById(R.id.button_middle);
         colorButton3 = findViewById(R.id.button_right);
-        pauseButton = findViewById(R.id.pause_button);
+        pauseButton = findViewById(R.id.pauseButton);
+        questionButton = findViewById(R.id.questionButton);
 
         startGame();
         startTimer(remainingTime);
@@ -80,13 +96,15 @@ public class ChooseColorActivity extends AppCompatActivity {
         colorButton2.setOnClickListener(v -> checkAnswer((String) colorButton2.getTag()));
         colorButton3.setOnClickListener(v -> checkAnswer((String) colorButton3.getTag()));
         pauseButton.setOnClickListener(v -> showPauseScreen());
+        questionButton.setOnClickListener(v -> showGameExplanationDialog());
     }
 
     private void startGame() {
         if (questionCount < 10 && heartCount > 0) {
             generateQuestion();
         } else {
-            showEndDialog("게임 성공!\n+300p");
+            updateUserPoints(10);
+            showEndDialog("게임 성공!\n+10p");
         }
     }
 
@@ -165,19 +183,9 @@ public class ChooseColorActivity extends AppCompatActivity {
     }
 
     private void updateHearts() {
-        leftHeart.setVisibility(View.VISIBLE);
-        middleHeart.setVisibility(View.VISIBLE);
-        rightHeart.setVisibility(View.VISIBLE);
-        if (heartCount == 2) {
-            rightHeart.setVisibility(View.INVISIBLE);
-        } else if (heartCount == 1) {
-            rightHeart.setVisibility(View.INVISIBLE);
-            middleHeart.setVisibility(View.INVISIBLE);
-        } else if (heartCount == 0) {
-            rightHeart.setVisibility(View.INVISIBLE);
-            middleHeart.setVisibility(View.INVISIBLE);
-            leftHeart.setVisibility(View.INVISIBLE);
-        }
+        leftHeart.setVisibility(heartCount >= 1 ? View.VISIBLE : View.INVISIBLE);
+        middleHeart.setVisibility(heartCount >= 2 ? View.VISIBLE : View.INVISIBLE);
+        rightHeart.setVisibility(heartCount >= 3 ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void showEndDialog(String message) {
@@ -194,6 +202,80 @@ public class ChooseColorActivity extends AppCompatActivity {
                 .setNegativeButton("종료", (dialog, which) -> finish())
                 .show();
     }
+
+
+    private void showGameExplanationDialog() {
+        pauseTimer(); // 타이머 일시정지
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("게임 설명")
+                .setMessage("이 게임은 주어진 단어의 뜻과 일치하는 색을 선택하는 게임입니다. " +
+                        "정답을 맞추면 점수를 얻고, 틀리면 생명이 줄어듭니다. " +
+                        "3번 틀리면 게임이 종료됩니다.")
+                .setPositiveButton("확인", (dialog, id) -> {
+                    dialog.dismiss();
+                    resumeTimer(); // 타이머 재개
+                });
+        AlertDialog dialog = builder.create();
+        dialog.setOnCancelListener(dialogInterface -> resumeTimer()); // 다이얼로그가 취소될 때 타이머 재개
+        dialog.show();
+    }
+
+    private void pauseTimer() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            isTimerPaused = true;
+        }
+    }
+
+    private void resumeTimer() {
+        if (isTimerPaused) {
+            startTimer(remainingTime);
+            isTimerPaused = false;
+        }
+    }
+
+    private void restartGame() {
+        // 하트와 문제 수 초기화
+        heartCount = 3;
+        questionCount = 0;
+        score = 0; // 맞힌 문제 수 초기화
+
+        updateHearts();
+
+        startGame();
+        startTimer(60000); // 60초 타이머 시작
+    }
+
+    private void updateUserPoints(int earnedPoints) {
+        Log.d("ChooseColorActivity", "updateUserPoints called with " + earnedPoints + " points");
+        if (currentUserId.isEmpty()) {
+            Log.e("ChooseColorActivity", "User ID is empty. Cannot update points.");
+            return;
+        }
+
+        DocumentReference userRef = db.collection("users").document(currentUserId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+            Long currentPoints = snapshot.getLong("points");
+            if (currentPoints == null) {
+                currentPoints = 0L;
+            }
+            long newPoints = currentPoints + earnedPoints;
+            transaction.update(userRef, "points", newPoints);
+            return newPoints;
+        }).addOnSuccessListener(newPoints -> {
+            Log.d("ChooseColorActivity", "Points updated successfully. New total: " + newPoints);
+            Toast.makeText(ChooseColorActivity.this,
+                    earnedPoints + " 포인트가 추가되었습니다!", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> {
+            Log.e("ChooseColorActivity", "Failed to update points: " + e.getMessage());
+            Toast.makeText(ChooseColorActivity.this,
+                    "포인트 업데이트에 실패했습니다: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
 
     private void showPauseScreen() {
         if (countDownTimer != null) countDownTimer.cancel();

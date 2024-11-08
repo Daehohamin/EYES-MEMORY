@@ -53,7 +53,6 @@ public class PauseExitActivity extends AppCompatActivity {
         finish();
     }
 
-
     private void exitGame() {
         Intent intent = new Intent(PauseExitActivity.this, GameSelectionActivity.class);
         startActivity(intent);

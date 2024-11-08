@@ -7,17 +7,13 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_myProfile"
         android:layout_width="325dp"
         android:layout_height="150dp"
         android:layout_marginHorizontal="26dp"
-        android:background="@drawable/cr10b1c6cc2"
-        android:drawableTop="@drawable/myprofile"
+        android:background="@drawable/myprofile"
         android:drawablePadding="8dp"
-        android:text="내 정보"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,32 +26,27 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="30dp"
         android:text="로그인"
+        android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_brainGame"
-        android:layout_width="140dp"
-        android:layout_height="130dp"
+        android:layout_width="155dp"
+        android:layout_height="145dp"
         android:layout_marginStart="46dp"
-        android:layout_marginTop="37dp"
-        android:drawableTop="@drawable/braingame"
-        android:drawablePadding="8dp"
-        android:text="두뇌 게임"
-        android:textSize="20sp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/braingame"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_myProfile" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_exercise"
-        android:layout_width="140dp"
-        android:layout_height="130dp"
-        android:layout_marginTop="37dp"
+        android:layout_width="155dp"
+        android:layout_height="145dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="46dp"
-        android:drawableTop="@drawable/material_symbols_exercise"
-        android:drawablePadding="8dp"
-        android:text="체조"
-        android:textSize="20sp"
+        android:background="@drawable/material_symbols_exercise"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_myProfile" />
 

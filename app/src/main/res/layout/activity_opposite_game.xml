@@ -8,6 +8,87 @@
     android:background="#FFFFFF"
     tools:context=".OppositeGameActivity">
 
+    <View
+        android:id="@+id/blue_bar"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/top_"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="13dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/blue_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/sand_clock"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/sandclock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/time_view_bar"
+            android:layout_width="74dp"
+            android:layout_height="26dp"
+            android:background="@drawable/gray"
+            app:layout_constraintStart_toEndOf="@id/sand_clock"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ProgressBar
+                android:id="@+id/timerProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="100dp"
+                android:layout_height="26dp"
+                android:progress="100"
+                android:progressDrawable="@drawable/timer_progress" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/left_heart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="180dp"
+            android:layout_marginEnd="3dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/heart"
+            app:layout_constraintStart_toEndOf="@id/time_view_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/middle_heart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="3dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/heart"
+            app:layout_constraintStart_toEndOf="@id/left_heart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/right_heart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/heart"
+            app:layout_constraintStart_toEndOf="@id/middle_heart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/wordAndOptionsLayout"
@@ -256,34 +337,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/livesLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/life1ImageView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:src="@drawable/heart" />
-
-        <ImageView
-            android:id="@+id/life2ImageView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:src="@drawable/heart" />
-
-        <ImageView
-            android:id="@+id/life3ImageView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/heart" />
-
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

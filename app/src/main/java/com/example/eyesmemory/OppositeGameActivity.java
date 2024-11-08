@@ -2,10 +2,12 @@ package com.example.eyesmemory;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +42,10 @@ public class OppositeGameActivity extends AppCompatActivity {
     private String currentUserId;
     private LinearLayout problemSet1, problemSet2, problemSet3;
     private int currentProblemIndex = 0;
+    private ProgressBar timerProgressBar;
+    private CountDownTimer countDownTimer;
+    private static final long GAME_DURATION = 60000; // 60 seconds
+    private boolean isTimerPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         updateLivesDisplay();
         displayNextWords();
         updateProblemSetHighlight();
+        startTimer(GAME_DURATION);
     }
 
     private void initializeViews() {
@@ -82,13 +89,15 @@ public class OppositeGameActivity extends AppCompatActivity {
         pauseButton = findViewById(R.id.pauseButton);
         faqButton = findViewById(R.id.faqButton);
 
-        life1ImageView = findViewById(R.id.life1ImageView);
-        life2ImageView = findViewById(R.id.life2ImageView);
-        life3ImageView = findViewById(R.id.life3ImageView);
+        life1ImageView = findViewById(R.id.left_heart);
+        life2ImageView = findViewById(R.id.middle_heart);
+        life3ImageView = findViewById(R.id.right_heart);
 
         problemSet1 = findViewById(R.id.problemSet1);
         problemSet2 = findViewById(R.id.problemSet2);
         problemSet3 = findViewById(R.id.problemSet3);
+
+        timerProgressBar = findViewById(R.id.timerProgressBar);
     }
 
     private void setupClickListeners() {
@@ -231,12 +240,26 @@ public class OppositeGameActivity extends AppCompatActivity {
         updateProblemSetHighlight();
     }
 
+    private void resumeTimer() {
+        if (isTimerPaused) {
+            long remainingTime = timerProgressBar.getProgress() * GAME_DURATION / 100;
+            startTimer(remainingTime);
+            isTimerPaused = false;
+        }
+    }
+
     private void showPauseDialog() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            isTimerPaused = true;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("게임 일시정지")
                 .setItems(new CharSequence[]{"계속하기", "나가기", "다시하기"}, (dialog, which) -> {
                     switch (which) {
                         case 0: // 계속하기
+                            resumeTimer();
                             dialog.dismiss();
                             break;
                         case 1: // 나가기
@@ -252,14 +275,47 @@ public class OppositeGameActivity extends AppCompatActivity {
     }
 
     private void showGameExplanationDialog() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            isTimerPaused = true;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("게임 설명")
                 .setMessage("이 게임은 주어진 단어의 반대말을 선택하는 게임입니다. " +
                         "정답을 맞추면 점수를 얻고, 틀리면 생명이 줄어듭니다. " +
                         "3번 틀리면 게임이 종료됩니다.")
-                .setPositiveButton("확인", (dialog, id) -> dialog.dismiss());
+                .setPositiveButton("확인", (dialog, id) -> {
+                    dialog.dismiss();
+                    resumeTimer();
+                });
         AlertDialog dialog = builder.create();
+        dialog.setOnCancelListener(dialogInterface -> resumeTimer());
         dialog.show();
+    }
+
+    private void startTimer(long duration) {
+        countDownTimer = new CountDownTimer(duration, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                int progress = (int) (millisUntilFinished * 100 / GAME_DURATION);
+                timerProgressBar.setProgress(progress);
+            }
+
+            @Override
+            public void onFinish() {
+                // 타이머가 끝났을 때 게임 종료
+                showGameOverDialog();
+            }
+        }.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 
     private void updateUserPoints(int earnedPoints) {
@@ -292,13 +348,20 @@ public class OppositeGameActivity extends AppCompatActivity {
     }
 
     private void showGameOverDialog() {
-        int earnedPoints = (lives > 0) ? POINTS_PER_GAME : 0;
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
 
-        updateUserPoints(earnedPoints);
-
+        int earnedPoints = 0;
         String message = "당신의 점수: " + score + "/" + wordList.size();
-        if (earnedPoints > 0) {
+
+        // 모든 문제를 풀었고 생명이 남아있는 경우에만 포인트 부여
+        if (currentWordIndex >= wordList.size() && lives > 0) {
+            earnedPoints = POINTS_PER_GAME;
             message += "\n획득한 포인트: " + earnedPoints;
+            updateUserPoints(earnedPoints);
+        } else {
+            message += "\n시간 내에 모든 문제를 풀지 못했거나 생명을 모두 잃어 포인트를 획득하지 못했습니다.";
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -310,7 +373,6 @@ public class OppositeGameActivity extends AppCompatActivity {
                 .show();
     }
 
-
     private void restartGame() {
         currentWordIndex = 0;
         currentProblemIndex = 0;
@@ -320,5 +382,12 @@ public class OppositeGameActivity extends AppCompatActivity {
         selectRandomWords();
         displayNextWords();
         updateProblemSetHighlight();
+
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        timerProgressBar.setProgress(100);
+        startTimer(GAME_DURATION);
+        isTimerPaused = false;
     }
 }

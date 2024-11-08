@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.result.ActivityResultLauncher;
@@ -12,7 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnNavigateToLogin;
-    private Button btnMyProfile, btnBrainGame, btnExercise;
+    private ImageButton btnMyProfile, btnBrainGame, btnExercise;
     private SharedPreferences sharedPreferences;
     private ActivityResultLauncher<Intent> loginLauncher;
 
