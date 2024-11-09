@@ -104,7 +104,7 @@ public class ChooseColorActivity extends AppCompatActivity {
             generateQuestion();
         } else {
             updateUserPoints(10);
-            showEndDialog("게임 성공!\n+10p");
+            showEndDialog("당신의 점수:" + score + "/10" +"\n획득한 포인트: +10p");
         }
     }
 
@@ -172,6 +172,7 @@ public class ChooseColorActivity extends AppCompatActivity {
     private void checkAnswer(String color) {
         if (correctColor.equals(color)) {
             questionCount++;
+            score++;
             startGame();
         } else {
             heartCount--;
@@ -191,7 +192,8 @@ public class ChooseColorActivity extends AppCompatActivity {
     private void showEndDialog(String message) {
         if (countDownTimer != null) countDownTimer.cancel();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message)
+        builder.setTitle("게임 종료")
+                .setMessage(message)
                 .setPositiveButton("다시 시작", (dialog, which) -> {
                     heartCount = 3;
                     questionCount = 0;
@@ -199,9 +201,15 @@ public class ChooseColorActivity extends AppCompatActivity {
                     startGame();
                     startTimer(60000);
                 })
-                .setNegativeButton("종료", (dialog, which) -> finish())
+                .setNegativeButton("종료", (dialog, which) -> {
+                    Intent intent = new Intent(this, GameSelectionActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
                 .show();
     }
+
 
 
     private void showGameExplanationDialog() {
@@ -233,18 +241,6 @@ public class ChooseColorActivity extends AppCompatActivity {
             startTimer(remainingTime);
             isTimerPaused = false;
         }
-    }
-
-    private void restartGame() {
-        // 하트와 문제 수 초기화
-        heartCount = 3;
-        questionCount = 0;
-        score = 0; // 맞힌 문제 수 초기화
-
-        updateHearts();
-
-        startGame();
-        startTimer(60000); // 60초 타이머 시작
     }
 
     private void updateUserPoints(int earnedPoints) {

@@ -384,10 +384,16 @@ public class OppositeGameActivity extends AppCompatActivity {
         builder.setTitle("게임 종료")
                 .setMessage(message)
                 .setPositiveButton("다시 시작", (dialog, which) -> restartGame())
-                .setNegativeButton("종료", (dialog, which) -> finish())
+                .setNegativeButton("종료", (dialog, which) -> {
+                    Intent intent = new Intent(this, GameSelectionActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
                 .setCancelable(false)
                 .show();
     }
+
 
     private void restartGame() {
         currentWordIndex = 0;
