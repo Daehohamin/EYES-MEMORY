@@ -47,13 +47,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ProgressBar
-                android:id="@+id/timerProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="100dp"
-                android:layout_height="26dp"
-                android:progress="100"
-                android:progressDrawable="@drawable/timer_progress" />
+            <TextView
+                android:id="@+id/time_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="1:00"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="20sp" />
         </LinearLayout>
 
         <ImageView

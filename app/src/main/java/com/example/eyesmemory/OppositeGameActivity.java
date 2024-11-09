@@ -32,7 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class OppositeGameActivity extends AppCompatActivity {
     private TextView wordTextView1, wordTextView2, wordTextView3;
-    private TextView option1Button1, option2Button1, option1Button2, option2Button2, option1Button3, option2Button3;
+    private TextView option1Button1, option2Button1, option1Button2, option2Button2, option1Button3, option2Button3, timeView;
     private LinearLayout option1Layout1, option2Layout1, option1Layout2, option2Layout2, option1Layout3, option2Layout3;
     private ImageButton pauseButton, faqButton;
     private ImageView life1ImageView, life2ImageView, life3ImageView;
@@ -46,7 +46,6 @@ public class OppositeGameActivity extends AppCompatActivity {
     private String currentUserId;
     private LinearLayout problemSet1, problemSet2, problemSet3;
     private int currentProblemIndex = 0;
-    private ProgressBar timerProgressBar;
     private CountDownTimer countDownTimer;
     private long remainingTime = 60000; // 60 seconds
     private boolean isTimerPaused = false;
@@ -102,7 +101,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         problemSet2 = findViewById(R.id.problemSet2);
         problemSet3 = findViewById(R.id.problemSet3);
 
-        timerProgressBar = findViewById(R.id.timerProgressBar);
+        timeView = findViewById(R.id.time_view);
     }
 
 
@@ -275,8 +274,7 @@ public class OppositeGameActivity extends AppCompatActivity {
 
     private void resumeTimer() {
         if (isTimerPaused) {
-            long remaining_Time = timerProgressBar.getProgress() * remainingTime / 100;
-            startTimer(remaining_Time);
+            startTimer(remainingTime);
             isTimerPaused = false;
         }
     }
@@ -310,12 +308,12 @@ public class OppositeGameActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void startTimer(long duration) {
-        countDownTimer = new CountDownTimer(duration, 1000) {
+    private void startTimer(long timeInMillis) {
+        countDownTimer = new CountDownTimer(timeInMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                int progress = (int) (millisUntilFinished * 100 / remainingTime);
-                timerProgressBar.setProgress(progress);
+                remainingTime = millisUntilFinished;
+                timeView.setText(millisUntilFinished / 1000 + "초");
             }
 
             @Override
@@ -408,8 +406,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
-        timerProgressBar.setProgress(100);
-        startTimer(remainingTime);
+        startTimer(60000);
         isTimerPaused = false;
     }
 }

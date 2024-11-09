@@ -28,7 +28,7 @@ public class ChooseColorActivity extends AppCompatActivity {
 
     private TextView changeText, timeView;
     private ImageView leftHeart, middleHeart, rightHeart;
-    private int score = 0; // 맞힌 문제 수
+    private int score = 10; // 맞힌 문제 수
     private int heartCount = 3;
     private int questionCount = 0;
     private String correctColor;
@@ -60,6 +60,7 @@ public class ChooseColorActivity extends AppCompatActivity {
                         } else {
                             heartCount = 3;
                             questionCount = 0;
+                            score = 10;
                             updateHearts();
                             startGame();
                             startTimer(60000);
@@ -105,6 +106,7 @@ public class ChooseColorActivity extends AppCompatActivity {
         } else {
             updateUserPoints(10);
             showEndDialog("당신의 점수:" + score + "/10" +"\n획득한 포인트: +10p");
+            score = 10;
         }
     }
 
@@ -172,10 +174,10 @@ public class ChooseColorActivity extends AppCompatActivity {
     private void checkAnswer(String color) {
         if (correctColor.equals(color)) {
             questionCount++;
-            score++;
             startGame();
         } else {
             heartCount--;
+            score--;
             updateHearts();
             if (heartCount == 0) {
                 showEndDialog("하트가 모두 소진되었습니다.");
@@ -199,6 +201,7 @@ public class ChooseColorActivity extends AppCompatActivity {
                     questionCount = 0;
                     updateHearts();
                     startGame();
+                    score = 10;
                     startTimer(60000);
                 })
                 .setNegativeButton("종료", (dialog, which) -> {
