@@ -48,7 +48,7 @@
                 android:src="@mipmap/ic_launcher" />
 
             <TextView
-                android:id="@+id/rul4gv7f7stn"
+                android:id="@+id/username_change"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -87,14 +87,17 @@
                 android:orientation="horizontal"/>
 
             <TextView
-                android:id="@+id/rhftjycky2fw"
+                android:id="@+id/revisename"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="이름 변경"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onReviseNameClick" />
         </LinearLayout>
 
         <LinearLayout
@@ -115,14 +118,17 @@
                 android:orientation="horizontal"/>
 
             <TextView
-                android:id="@+id/rvbv5ekw05wg"
+                android:id="@+id/reviseid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="아이디 변경"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onReviseIdClick" />
         </LinearLayout>
 
         <LinearLayout
@@ -143,14 +149,17 @@
                 android:orientation="horizontal"/>
 
             <TextView
-                android:id="@+id/rnhi6hahb2u9"
+                android:id="@+id/revisepassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="비밀번호 변경"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onRevisePasswordClick" />
         </LinearLayout>
     </LinearLayout>
 
