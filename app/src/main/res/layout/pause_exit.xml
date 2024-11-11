@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#FFFFFF"
+    android:layout_gravity="center"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    android:layout_width="196dp"
+    android:layout_height="wrap_content"
+    tools:context=".PauseExitActivity">
+
+    <ImageButton
+        android:id="@+id/continue_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/continue_button"
+        android:contentDescription="게임 계속하기 버튼">
+
+    </ImageButton>
+
+    <ImageButton
+        android:id="@+id/exit_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/exit"
+        android:layout_marginTop="15dp"
+        android:contentDescription="게임 나가기 버튼">
+
+    </ImageButton>
+
+    <ImageButton
+        android:id="@+id/restart_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/again"
+        android:layout_marginTop="15dp"
+        android:contentDescription="게임 다시시작하기 버튼">
+
+    </ImageButton>
+</LinearLayout>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/game_selection_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- 시선 추적을 위한 TextureView -->
+    <TextureView
+        android:id="@+id/preview"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 시선 좌표를 표시하기 위한 PointView -->
+    <visual.camp.sample.view.PointView
+        android:id="@+id/view_point"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 추적 경고를 위한 View -->
+    <View
+        android:id="@+id/view_warning_tracking"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80FF0000"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:id="@+id/rt58ppb7j47p"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFFFFF"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingHorizontal="42dp"
+            android:paddingTop="77dp">
+
+            <LinearLayout
+                android:layout_width="281dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/point_reveal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="19dp"
+                    android:background="@drawable/gray"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingVertical="20dp">
+
+                    <TextView
+                        android:id="@+id/point_own"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="25dp"
+                        android:text="보유 포인트"
+                        android:textStyle="bold"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/point_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:text="3000P"
+                        android:textColor="#000000"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/chooing_select"
+                    android:contentDescription="색깔 고르기 게임 창으로 가는 버튼"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="13dp"
+                    android:background="@drawable/choose_select"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="13dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="10dp">
+
+                </ImageButton>
+
+                <ImageButton
+                    android:id="@+id/opposite_select"
+                    android:contentDescription="반대말 찾기 창으로 가는 버튼"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/opoosite_select"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:orientation="vertical"
+                    android:paddingVertical="19dp"
+                    android:paddingRight="13dp">
+
+                </ImageButton>
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <!-- 시선 교정 뷰 -->
+    <visual.camp.sample.view.CalibrationViewer
+        android:id="@+id/view_calibration_game"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+
+        <include layout="@layout/layout_progress" />
+    </visual.camp.sample.view.CalibrationViewer>
+</androidx.constraintlayout.widget.ConstraintLayout>
