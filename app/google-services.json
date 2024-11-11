@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "405755544798",
+    "project_id": "eyesmemory-4dd60",
+    "storage_bucket": "eyesmemory-4dd60.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405755544798:android:593945eaea9496a58d6e4f",
+        "android_client_info": {
+          "package_name": "com.example.eyesmemory"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsQfx6ejMAQdBIy6Ef6jbgFEQb5KuZqH0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

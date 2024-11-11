@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    tools:context=".OppositeGameActivity">
+
+    <View
+        android:id="@+id/blue_bar"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/top_"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="13dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/blue_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/sand_clock"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/sandclock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/time_view_bar"
+            android:layout_width="74dp"
+            android:layout_height="26dp"
+            android:background="@drawable/gray"
+            app:layout_constraintStart_toEndOf="@id/sand_clock"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/time_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="1:00"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/left_heart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="180dp"
+            android:layout_marginEnd="3dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/heart"
+            app:layout_constraintStart_toEndOf="@id/time_view_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/middle_heart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="3dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/heart"
+            app:layout_constraintStart_toEndOf="@id/left_heart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/right_heart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/heart"
+            app:layout_constraintStart_toEndOf="@id/middle_heart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/wordAndOptionsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="11dp"
+        android:layout_marginTop="200dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 첫 번째 단어와 선택지 -->
+        <LinearLayout
+            android:id="@+id/problemSet1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="35dp"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
+
+            <LinearLayout
+                android:id="@+id/wordLayout1"
+                android:layout_width="99dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19b1c6cc2"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/wordTextView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    tools:text="단어1" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/option1Layout1"
+                android:layout_width="98dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19bffffff"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/option1Button1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    tools:text="선택지1" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/option2Layout1"
+                android:layout_width="98dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19bffffff"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/option2Button1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    tools:text="선택지2" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 두 번째 단어와 선택지 -->
+        <LinearLayout
+            android:id="@+id/problemSet2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="35dp"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
+
+            <LinearLayout
+                android:id="@+id/wordLayout2"
+                android:layout_width="99dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19b1c6cc2"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/wordTextView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    tools:text="단어2" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/option1Layout2"
+                android:layout_width="98dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19bffffff"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/option1Button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    tools:text="선택지1" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/option2Layout2"
+                android:layout_width="98dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19bffffff"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/option2Button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    tools:text="선택지2" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 세 번째 단어와 선택지 -->
+        <LinearLayout
+            android:id="@+id/problemSet3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="35dp"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
+
+            <LinearLayout
+                android:id="@+id/wordLayout3"
+                android:layout_width="99dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19b1c6cc2"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/wordTextView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    tools:text="단어3" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/option1Layout3"
+                android:layout_width="98dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19bffffff"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/option1Button3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    tools:text="선택지1" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/option2Layout3"
+                android:layout_width="98dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/s1c6cc2sw3cr19bffffff"
+                android:gravity="center_horizontal"
+                android:paddingVertical="27dp">
+
+                <TextView
+                    android:id="@+id/option2Button3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    tools:text="선택지2" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/pauseButton"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="일시정지"
+        android:src="@drawable/pause"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageButton
+        android:id="@+id/faqButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="게임 설명"
+        android:src="@drawable/question"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
