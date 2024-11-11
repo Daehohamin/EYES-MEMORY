@@ -16,6 +16,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import android.content.res.ColorStateList;
 import android.widget.Toast;
@@ -23,6 +26,13 @@ import android.widget.Toast;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import camp.visual.gazetracker.callback.GazeCallback;
+import camp.visual.gazetracker.filter.OneEuroFilterManager;
+import camp.visual.gazetracker.gaze.GazeInfo;
+import camp.visual.gazetracker.state.EyeMovementState;
+import camp.visual.gazetracker.util.ViewLayoutChecker;
+import visual.camp.sample.view.GazePathView;
 
 public class ChooseColorActivity extends AppCompatActivity {
 
@@ -43,6 +53,16 @@ public class ChooseColorActivity extends AppCompatActivity {
     private int[] colorValues = {Color.BLACK, Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.rgb(255, 165, 0), Color.MAGENTA, Color.CYAN};
 
     private ImageButton colorButton1, colorButton2, colorButton3, pauseButton, questionButton;
+
+    private GazePathView gazePathView;
+    private GazeTrackerManager gazeTrackerManager;
+    private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
+
+    private final OneEuroFilterManager oneEuroFilterManager = new OneEuroFilterManager(
+            2, 30, 0.5F, 0.001F, 1.0F);
+
+    private Map<ImageButton, Long> gazeStartTimeMap = new HashMap<>();
+    private static final long GAZE_HOLD_DURATION = 1000; // 1.0초
 
     private final ActivityResultLauncher<Intent> pauseResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -89,6 +109,9 @@ public class ChooseColorActivity extends AppCompatActivity {
         colorButton3 = findViewById(R.id.button_right);
         pauseButton = findViewById(R.id.pauseButton);
         questionButton = findViewById(R.id.questionButton);
+
+        gazePathView = findViewById(R.id.gazePathView);
+        gazeTrackerManager = GazeTrackerManager.getInstance();
 
         startGame();
         startTimer(remainingTime);
@@ -284,4 +307,84 @@ public class ChooseColorActivity extends AppCompatActivity {
         intent.putExtra("questionCount", questionCount);
         pauseResultLauncher.launch(intent);
     }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        gazeTrackerManager.startGazeTracking();
+        setOffsetOfView();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        gazeTrackerManager.stopGazeTracking();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gazeTrackerManager.removeCallbacks(gazeCallback);
+    }
+
+
+    private final GazeCallback gazeCallback = new GazeCallback() {
+        @Override
+        public void onGaze(GazeInfo gazeInfo) {
+            if (oneEuroFilterManager.filterValues(gazeInfo.timestamp, gazeInfo.x, gazeInfo.y)) {
+                float[] filtered = oneEuroFilterManager.getFilteredValues();
+                gazePathView.onGaze(filtered[0], filtered[1], gazeInfo.eyeMovementState == EyeMovementState.FIXATION);
+                handleGazeEvent(filtered[0], filtered[1]);
+            }
+        }
+    };
+
+    private void setOffsetOfView() {
+        viewLayoutChecker.setOverlayView(gazePathView, new ViewLayoutChecker.ViewLayoutListener() {
+            @Override
+            public void getOffset(int x, int y) {
+                gazePathView.setOffset(x, y);
+            }
+        });
+    }
+
+    private void handleGazeEvent(float gazeX, float gazeY) {
+        long currentTime = System.currentTimeMillis();
+
+        List<ImageButton> buttons = List.of(colorButton1, colorButton2, colorButton3);
+
+        for (ImageButton buttonView : buttons) {
+            if (buttonView == null) continue;
+
+            int[] location = new int[2];
+            buttonView.getLocationOnScreen(location);
+            float x = location[0] ; //POINT_RADIUS
+            float y = location[1] ;
+            float width = buttonView.getWidth() + 40;
+            float height = buttonView.getHeight() + 40;
+
+            // 시선이 특정 imageView 위에 있는지 확인
+            if (gazeX >= x && gazeX <= x + width && gazeY >= y && gazeY <= y + height) {
+                if (!gazeStartTimeMap.containsKey(buttonView)) {
+                    gazeStartTimeMap.put(buttonView, currentTime);
+                } else {
+                    long gazeDuration = currentTime - gazeStartTimeMap.get(buttonView);
+                    if (gazeDuration >= GAZE_HOLD_DURATION) {
+                        runOnUiThread(() -> buttonView.performClick());
+                        gazeStartTimeMap.remove(buttonView); // 시선이 유지된 후 맵에서 제거
+                    }
+                }
+            } else {
+                gazeStartTimeMap.remove(buttonView); // 시선이 벗어나면 맵에서 제거
+            }
+        }
+    }
+
 }

@@ -30,6 +30,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import camp.visual.gazetracker.callback.UserStatusCallback;
+
 public class OppositeGameActivity extends AppCompatActivity {
     private TextView wordTextView1, wordTextView2, wordTextView3;
     private TextView option1Button1, option2Button1, option1Button2, option2Button2, option1Button3, option2Button3, timeView;
@@ -51,6 +53,21 @@ public class OppositeGameActivity extends AppCompatActivity {
     private boolean isTimerPaused = false;
     private int questionCount = 0;
 
+
+    private final long BLINK_DETECTION_DELAY = 200; // 딜레이 설정
+    private final float CLOSED_THRESHOLD = 0.245f; // 눈 감은 것으로 간주하는 임계값
+    private final float OPEN_THRESHOLD = 0.55f;   // 눈 뜬 것으로 간주하는 임계값
+    private final float MAX_EYE_DIFFERENCE = 0.255f;
+    // 두 눈의 openness 차이가 이 값보다 작으면 양쪽 눈이 같은 상태로 간주
+    private long lastBlinkTime = 0;
+    // 마지막으로 감지된 상태를 기록해 중복 클릭 방지
+    private boolean isLeftEyeLastClosed = false;
+    private boolean isRightEyeLastClosed = false;
+    private boolean bothEyesClosed = false; // 양쪽 눈이 동시에 감겼는지 추적
+
+
+    private GazeTrackerManager gazeTrackerManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +75,8 @@ public class OppositeGameActivity extends AppCompatActivity {
 
         initializeViews();
         setupClickListeners();
+
+        gazeTrackerManager = GazeTrackerManager.getInstance();
 
         db = FirebaseFirestore.getInstance();
         currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("userId", "");
@@ -235,8 +254,19 @@ public class OppositeGameActivity extends AppCompatActivity {
         option2.setAlpha(enabled ? 1.0f : 0.5f);
     }
 
+    private void checkAnswerByBlink(boolean isLeft) {
+        List<LinearLayout> buttons = isLeft
+                ? List.of(option1Layout1, option1Layout2, option1Layout3)
+                : List.of(option2Layout1, option2Layout2, option2Layout3);
+
+        int index = currentProblemIndex % 3;
+        LinearLayout button = buttons.get(index);
+        runOnUiThread(button::performClick);
+    }
 
     private void checkAnswer(String selectedAnswer) {
+        if (heartCount <= 0) return;
+
         WordPair currentWord = wordList.get(currentWordIndex);
         String correctAnswer = currentWord.getAnswer();
 
@@ -409,4 +439,98 @@ public class OppositeGameActivity extends AppCompatActivity {
         startTimer(60000);
         isTimerPaused = false;
     }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        gazeTrackerManager.setGazeTrackerCallbacks(userStatusCallback);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        gazeTrackerManager.startGazeTracking();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        gazeTrackerManager.stopGazeTracking();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gazeTrackerManager.removeCallbacks(userStatusCallback);
+    }
+
+    private final UserStatusCallback userStatusCallback = new UserStatusCallback() {
+        @Override
+        public void onAttention(long timestampBegin, long timestampEnd, float attentionScore) {
+            // 주의력 상태 처리
+        }
+
+
+        @Override
+        public void onBlink(long timestamp,
+                            boolean isBlinkLeft,
+                            boolean isBlinkRight,
+                            boolean isBlink,
+                            float leftOpenness,
+                            float rightOpenness) {
+            if (timestamp - lastBlinkTime < BLINK_DETECTION_DELAY) return; // 연속 감지 방지
+
+            boolean isLeftEyeClosed = leftOpenness < CLOSED_THRESHOLD;
+            boolean isRightEyeClosed = rightOpenness < CLOSED_THRESHOLD;
+            boolean isLeftEyeOpen = leftOpenness > OPEN_THRESHOLD;
+            boolean isRightEyeOpen = rightOpenness > OPEN_THRESHOLD;
+
+            float eyeOpennessDifference = Math.abs(leftOpenness - rightOpenness);
+
+            // 양쪽 눈이 거의 동일한 상태일 때
+            if (eyeOpennessDifference < MAX_EYE_DIFFERENCE) {
+                if (isLeftEyeClosed && isRightEyeClosed) {
+                    // 모두 감긴 경우
+                    bothEyesClosed = true;
+                    isLeftEyeLastClosed = false;
+                    isRightEyeLastClosed = false;
+                    return;
+                } else if (isLeftEyeOpen && isRightEyeOpen) {
+                    // 모두 열린 경우
+                    bothEyesClosed = false;
+                    isLeftEyeLastClosed = false;
+                    isRightEyeLastClosed = false;
+                    return;
+                } else {
+                    // 양쪽 눈이 동일한 상태가 아닐 때는 아무 작업도 하지 않음
+                    return;
+                }
+            }
+
+            if (bothEyesClosed) return;
+
+            // 왼쪽 눈이 감겼고 오른쪽 눈이 열려 있으며, 두 눈의 차이가 클 때만 왼쪽 버튼 클릭
+            if (isLeftEyeClosed && isRightEyeOpen && !isLeftEyeLastClosed &&
+                    eyeOpennessDifference >= MAX_EYE_DIFFERENCE) {
+                runOnUiThread(() -> checkAnswerByBlink(true));
+                lastBlinkTime = timestamp;
+                isLeftEyeLastClosed = true;
+                isRightEyeLastClosed = false;
+            }
+            // 오른쪽 눈이 감겼고 왼쪽 눈이 열려 있으며, 두 눈의 차이가 클 때만 오른쪽 버튼 클릭
+            else if (isRightEyeClosed && isLeftEyeOpen && !isRightEyeLastClosed &&
+                    eyeOpennessDifference >= MAX_EYE_DIFFERENCE) {
+                runOnUiThread(() -> checkAnswerByBlink(false));
+                lastBlinkTime = timestamp;
+                isRightEyeLastClosed = true;
+                isLeftEyeLastClosed = false;
+            }
+        }
+
+        @Override
+        public void onDrowsiness(long timestamp, boolean isDrowsiness, float intensity) {
+            // 졸림 상태 처리
+        }
+    };
 }

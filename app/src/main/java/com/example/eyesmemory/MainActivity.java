@@ -44,8 +44,7 @@ public class MainActivity extends AppCompatActivity {
         btnNavigateToLogin.setOnClickListener(v -> handleLoginLogout());
 
         btnMyProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, MyInformActivity.class);
-            startActivity(intent);
+            Toast.makeText(this, "내 정보 기능은 아직 구현되지 않았습니다.", Toast.LENGTH_SHORT).show();
         });
 
         btnBrainGame.setOnClickListener(v -> {

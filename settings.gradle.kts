@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "EyesMemory"
 include(":app")
+include(":view")
