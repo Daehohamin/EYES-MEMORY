@@ -26,9 +26,6 @@
             android:name=".MainActivity"
             android:exported="true"/>
         <activity
-            android:name=".MyInformActivity"
-            android:exported="true"/>
-        <activity
             android:name=".PauseExitActivity"
             android:exported="true" />
 
