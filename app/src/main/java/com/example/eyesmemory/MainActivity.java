@@ -1,11 +1,14 @@
 package com.example.eyesmemory;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        // 뒤로 가기 버튼 처리를 위한 콜백 추가
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                showExitConfirmationDialog();
+            }
+        });
+
         btnNavigateToLogin.setOnClickListener(v -> handleLoginLogout());
 
         btnMyProfile.setOnClickListener(v -> {
@@ -64,6 +75,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateLoginLogoutButton();
+    }
+
+    private void showExitConfirmationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("앱 종료")
+                .setMessage("앱을 종료하시겠습니까?")
+                .setPositiveButton("예", (dialog, which) -> {
+                    // 사용자가 "예"를 선택한 경우 앱 종료
+                    finishAffinity();
+                })
+                .setNegativeButton("아니오", (dialog, which) -> {
+                    // 사용자가 "아니오"를 선택한 경우 대화상자만 닫힘
+                    dialog.dismiss();
+                })
+                .show();
     }
 
     private void updateLoginLogoutButton() {

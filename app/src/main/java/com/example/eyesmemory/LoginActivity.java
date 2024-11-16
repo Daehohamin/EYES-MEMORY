@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
     private FirebaseFirestore db;
+    private CheckBox keepLoggedInCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +33,22 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        binding.r1oita9oihdr.setOnClickListener(view -> {
-            // TODO: Implement ID/Password recovery functionality
-            Toast.makeText(this, "아이디/비밀번호 찾기 기능은 아직 구현되지 않았습니다.", Toast.LENGTH_SHORT).show();
-        });
+        keepLoggedInCheckBox = binding.r8xy4ihly4wl;
+        // 자동 로그인 확인
+        checkAutoLogin();
+    }
+
+    private void checkAutoLogin() {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedUserId = prefs.getString("userId", null);
+        boolean keepLoggedIn = prefs.getBoolean("keepLoggedIn", false);
+
+        if (savedUserId != null && keepLoggedIn) {
+            // 자동 로그인 처리
+            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(mainIntent);
+            finish();
+        }
     }
 
     private void loginUser() {
@@ -59,9 +73,10 @@ public class LoginActivity extends AppCompatActivity {
                             if (storedPwd != null && storedPwd.equals(userPw) && storedUserId != null && storedUserId.equals(userId)) {
                                 Log.d("LoginActivity", "Login successful");
 
-                                // Save login state
+                                // 로그인 상태 저장
                                 SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
                                 editor.putString("userId", userId);
+                                editor.putBoolean("keepLoggedIn", keepLoggedInCheckBox.isChecked()); // 체크박스 상태 저장
                                 editor.apply();
 
                                 Toast.makeText(LoginActivity.this, "로그인 성공!", Toast.LENGTH_SHORT).show();
@@ -87,6 +102,4 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-
-
 }

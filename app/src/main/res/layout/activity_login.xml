@@ -111,8 +111,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
-                            android:buttonTint="#1C6CC2"
-                            android:checked="false" />
+                            android:button="@null"
+                            android:drawableLeft="?android:attr/listChoiceIndicatorMultiple"
+                            android:drawableTint="#1C6CC2" />
 
                         <TextView
                             android:id="@+id/r3hunwk3ehkx"
@@ -121,15 +122,15 @@
                             android:layout_weight="1"
                             android:text="로그인 상태 유지"
                             android:textColor="#000000"
-                            android:textSize="10sp" />
+                            android:textSize="15sp" />
                     </LinearLayout>
 
-                    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    <LinearLayout
                         android:id="@+id/rtc2na1673w"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="48dp"
-                        android:gravity="center_vertical"
+                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <TextView
@@ -138,32 +139,9 @@
                             android:layout_height="wrap_content"
                             android:text="회원가입"
                             android:textColor="#000000"
-                            android:textSize="10sp" />
+                            android:textSize="15sp"
+                            android:layout_gravity="center" />
 
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                            android:id="@+id/r6w1t7adccr8"
-                            android:layout_width="2dp"
-                            android:layout_height="10dp"
-                            android:background="#000000"
-                            android:orientation="vertical"></LinearLayout>
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:id="@+id/r1oita9oihdr"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="아이디/비밀번호 찾기"
-                            android:textColor="#000000"
-                            android:textSize="10sp" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
