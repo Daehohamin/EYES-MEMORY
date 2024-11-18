@@ -126,12 +126,14 @@ public class ChooseColorActivity extends AppCompatActivity {
     private void startGame() {
         if (questionCount < 10 && heartCount > 0) {
             generateQuestion();
-        } else {
+        } else if (heartCount > 0) {
             updateUserPoints(10);
             showEndDialog("당신의 점수:" + score + "/10" +"\n획득한 포인트: +10p");
-            score = 10;
+        } else {
+            showEndDialog("하트가 모두 소진되었습니다.\n목숨을 구입하시겠습니까?");
         }
     }
+
 
     private void startTimer(long timeInMillis) {
         countDownTimer = new CountDownTimer(timeInMillis, 1000) {
@@ -203,10 +205,13 @@ public class ChooseColorActivity extends AppCompatActivity {
             score--;
             updateHearts();
             if (heartCount == 0) {
-                showEndDialog("하트가 모두 소진되었습니다.");
+                showEndDialog("목숨을 모두 잃었습니다. 목숨을 구입하시겠습니까?");
+            } else {
+                generateQuestion();
             }
         }
     }
+
 
     private void updateHearts() {
         leftHeart.setVisibility(heartCount >= 1 ? View.VISIBLE : View.INVISIBLE);
@@ -219,24 +224,66 @@ public class ChooseColorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("게임 종료")
                 .setMessage(message)
-                .setPositiveButton("다시 시작", (dialog, which) -> {
-                    heartCount = 3;
-                    questionCount = 0;
-                    updateHearts();
-                    startGame();
-                    score = 10;
-                    startTimer(60000);
-                })
+                .setPositiveButton("다시 시작", (dialog, which) -> restartGame())
                 .setNegativeButton("종료", (dialog, which) -> {
                     Intent intent = new Intent(this, GameSelectionActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
-                })
-                .show();
+                });
+
+        if (heartCount <= 0) {
+            builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
+        }
+
+        builder.show();
     }
 
+    private void purchaseLife() {
+        DocumentReference userRef = db.collection("users").document(currentUserId);
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+            Long currentPoints = snapshot.getLong("points");
+            if (currentPoints == null || currentPoints < 5) {
+                return null; // 포인트가 부족한 경우 null 반환
+            }
+            long newPoints = currentPoints - 5;
+            transaction.update(userRef, "points", newPoints);
+            return newPoints;
+        }).addOnSuccessListener(result -> {
+            if (result == null) {
+                Toast.makeText(ChooseColorActivity.this, "포인트가 부족합니다.", Toast.LENGTH_SHORT).show();
+                // 포인트가 부족할 경우 게임 선택 화면으로 이동
+                Intent intent = new Intent(ChooseColorActivity.this, GameSelectionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                heartCount = 1;
+                updateHearts();
+                Toast.makeText(ChooseColorActivity.this, "목숨이 회복되었습니다!", Toast.LENGTH_SHORT).show();
+                continueGame();
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(ChooseColorActivity.this, "오류가 발생했습니다: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+    private void continueGame() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        startTimer(remainingTime);
+        generateQuestion();
+    }
 
+    private void restartGame() {
+        heartCount = 3;
+        questionCount = 0;
+        score = 10;
+        updateHearts();
+        startGame();
+        startTimer(60000);
+    }
 
     private void showGameExplanationDialog() {
         pauseTimer(); // 타이머 일시정지

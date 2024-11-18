@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,7 +51,8 @@ public class OppositeGameActivity extends AppCompatActivity {
     private long remainingTime = 60000; // 60 seconds
     private boolean isTimerPaused = false;
     private int questionCount = 0;
-
+    private AlertDialog gameOverDialog;
+    private boolean isGameOver = false;
 
     private final long BLINK_DETECTION_DELAY = 200; // 딜레이 설정
     private final float CLOSED_THRESHOLD = 0.245f; // 눈 감은 것으로 간주하는 임계값
@@ -176,7 +176,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         life2ImageView.setVisibility(heartCount >= 2 ? View.VISIBLE : View.INVISIBLE);
         life3ImageView.setVisibility(heartCount >= 3 ? View.VISIBLE : View.INVISIBLE);
 
-        if (heartCount <= 0) {
+        if (heartCount <= 0 && !isGameOver) {
             showGameOverDialog();
         }
     }
@@ -266,10 +266,8 @@ public class OppositeGameActivity extends AppCompatActivity {
 
     private void checkAnswer(String selectedAnswer) {
         if (heartCount <= 0) return;
-
         WordPair currentWord = wordList.get(currentWordIndex);
         String correctAnswer = currentWord.getAnswer();
-
         if (selectedAnswer.equals(correctAnswer)) {
             score++;
             Toast.makeText(this, "정답입니다!", Toast.LENGTH_SHORT).show();
@@ -277,28 +275,20 @@ public class OppositeGameActivity extends AppCompatActivity {
             heartCount--;
             updateLivesDisplay();
             Toast.makeText(this, "틀렸습니다. 정답은 " + correctAnswer + "입니다.", Toast.LENGTH_SHORT).show();
-
             if (heartCount <= 0) {
                 showGameOverDialog();
                 return;
             }
         }
-
-        // 현재 문제 인덱스 증가
         currentWordIndex++;
         currentProblemIndex++;
-
-        // 모든 문제를 다 풀었는지 확인
         if (currentWordIndex >= wordList.size()) {
-            showGameOverDialog(); // 모든 문제를 다 풀었으면 게임 종료
+            showGameOverDialog();
             return;
         }
-
-        // 3문제마다 새로운 문제를 표시
         if (currentWordIndex % 3 == 0) {
             displayNextWords();
         }
-
         updateProblemSetHighlight();
     }
 
@@ -311,7 +301,7 @@ public class OppositeGameActivity extends AppCompatActivity {
 
     private void showPauseScreen() {
         if (countDownTimer != null) countDownTimer.cancel();
-        Intent intent = new Intent(this, PauseExitActivity.class);
+        Intent intent = new Intent(this, com.example.eyesmemory.PauseExitActivity.class);
         intent.putExtra("remainingTime", remainingTime);
         intent.putExtra("heartCount", heartCount);
         intent.putExtra("questionCount", questionCount);
@@ -391,21 +381,68 @@ public class OppositeGameActivity extends AppCompatActivity {
         });
     }
 
-    private void showGameOverDialog() {
+    private void purchaseLife() {
+        DocumentReference userRef = db.collection("users").document(currentUserId);
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+            Long currentPoints = snapshot.getLong("points");
+            if (currentPoints == null || currentPoints < 5) {
+                return null; // 포인트가 부족한 경우 null 반환
+            }
+            long newPoints = currentPoints - 5;
+            transaction.update(userRef, "points", newPoints);
+            return newPoints;
+        }).addOnSuccessListener(result -> {
+            if (result == null) {
+                Toast.makeText(OppositeGameActivity.this, "포인트가 부족합니다.", Toast.LENGTH_SHORT).show();
+                // GameSelectionActivity로 이동
+                Intent intent = new Intent(OppositeGameActivity.this, GameSelectionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                heartCount = 1;
+                updateLivesDisplay();
+                Toast.makeText(OppositeGameActivity.this, "목숨이 회복되었습니다!", Toast.LENGTH_SHORT).show();
+                if (gameOverDialog != null && gameOverDialog.isShowing()) {
+                    gameOverDialog.dismiss();
+                }
+                isGameOver = false;  // 게임 오버 상태 해제
+                continueGame();
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(OppositeGameActivity.this, "오류가 발생했습니다: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void continueGame() {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
+        startTimer(remainingTime);
+        if (currentWordIndex % 3 == 0) {
+            displayNextWords();
+        }
+        updateProblemSetHighlight();
+    }
 
+    private void showGameOverDialog() {
+        if (isGameOver) return;  // 이미 게임 오버 상태라면 다이얼로그를 다시 표시하지 않음
+        isGameOver = true;
+
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
         int earnedPoints = 0;
         String message = "당신의 점수: " + score + "/" + wordList.size();
-
-        // 모든 문제를 풀었고 생명이 남아있는 경우에만 포인트 부여
         if (currentWordIndex >= wordList.size() && heartCount > 0) {
             earnedPoints = POINTS_PER_GAME;
             message += "\n획득한 포인트: " + earnedPoints;
             updateUserPoints(earnedPoints);
+        } else if (heartCount <= 0) {
+            message += "\n목숨을 모두 잃었습니다. 목숨을 구입하시겠습니까?";
         } else {
-            message += "\n시간 내에 모든 문제를 풀지 못했거나 생명을 모두 잃어 포인트를 획득하지 못했습니다.";
+            message += "\n시간 내에 모든 문제를 풀지 못했습니다.";
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -418,12 +455,24 @@ public class OppositeGameActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 })
-                .setCancelable(false)
-                .show();
+                .setCancelable(false);
+
+        if (heartCount <= 0) {
+            builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
+
+        }
+
+        gameOverDialog = builder.create();
+        gameOverDialog.show();
     }
 
-
     private void restartGame() {
+        Log.d("OppositeGameActivity", "restartGame called");
+        if (gameOverDialog != null && gameOverDialog.isShowing()) {
+            gameOverDialog.dismiss();
+        }
+        isGameOver = false;
+
         currentWordIndex = 0;
         currentProblemIndex = 0;
         score = 0;
@@ -439,7 +488,6 @@ public class OppositeGameActivity extends AppCompatActivity {
         startTimer(60000);
         isTimerPaused = false;
     }
-
 
     @Override
     protected void onStart() {
