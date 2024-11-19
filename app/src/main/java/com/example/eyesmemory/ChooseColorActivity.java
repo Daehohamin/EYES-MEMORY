@@ -145,8 +145,9 @@ public class ChooseColorActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                showEndDialog("시간 초과!");
+                showEndDialog("시간초과!");
             }
+
         }.start();
     }
 
@@ -234,6 +235,9 @@ public class ChooseColorActivity extends AppCompatActivity {
 
         if (heartCount <= 0) {
             builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
+        }else{
+            builder.setNeutralButton("시간 구입 (5 포인트)", (dialog, which) -> purchaseTime());
+
         }
 
         builder.show();
@@ -268,6 +272,35 @@ public class ChooseColorActivity extends AppCompatActivity {
             Toast.makeText(ChooseColorActivity.this, "오류가 발생했습니다: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
+
+    private void purchaseTime() {
+        DocumentReference userRef = db.collection("users").document(currentUserId);
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+            Long currentPoints = snapshot.getLong("points");
+            if (currentPoints == null || currentPoints < 5) {
+                return null; // 포인트 부족 시 null 반환
+            }
+            long newPoints = currentPoints - 5;
+            transaction.update(userRef, "points", newPoints);
+            return newPoints;
+        }).addOnSuccessListener(result -> {
+            if (result == null) {
+                Toast.makeText(ChooseColorActivity.this, "포인트가 부족합니다.", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(ChooseColorActivity.this, GameSelectionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                remainingTime += 10000; // 10초 추가
+                Toast.makeText(ChooseColorActivity.this, "시간이 10초 추가되었습니다!", Toast.LENGTH_SHORT).show();
+                startTimer(remainingTime);
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(ChooseColorActivity.this, "오류가 발생했습니다: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
     private void continueGame() {
         if (countDownTimer != null) {
             countDownTimer.cancel();

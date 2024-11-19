@@ -415,6 +415,35 @@ public class OppositeGameActivity extends AppCompatActivity {
         });
     }
 
+    private void purchaseTime() {
+        DocumentReference userRef = db.collection("users").document(currentUserId);
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+            Long currentPoints = snapshot.getLong("points");
+            if (currentPoints == null || currentPoints < 5) {
+                return null; // 포인트가 부족한 경우 null 반환
+            }
+            long newPoints = currentPoints - 5;
+            transaction.update(userRef, "points", newPoints);
+            return newPoints;
+        }).addOnSuccessListener(result -> {
+            if (result == null) {
+                Toast.makeText(OppositeGameActivity.this, "포인트가 부족합니다.", Toast.LENGTH_SHORT).show();
+                // GameSelectionActivity로 이동
+                Intent intent = new Intent(OppositeGameActivity.this, GameSelectionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                remainingTime += 10000; // 10초 추가
+                Toast.makeText(OppositeGameActivity.this, "시간이 10초 추가되었습니다!", Toast.LENGTH_SHORT).show();
+                continueGame();
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(OppositeGameActivity.this, "오류가 발생했습니다: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
     private void continueGame() {
         if (countDownTimer != null) {
             countDownTimer.cancel();
@@ -442,7 +471,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         } else if (heartCount <= 0) {
             message += "\n목숨을 모두 잃었습니다. 목숨을 구입하시겠습니까?";
         } else {
-            message += "\n시간 내에 모든 문제를 풀지 못했습니다.";
+            message += "\n시간이 초과되었습니다. 시간을 구입하시겠습니까?";
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -459,7 +488,8 @@ public class OppositeGameActivity extends AppCompatActivity {
 
         if (heartCount <= 0) {
             builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
-
+        }else{
+            builder.setNeutralButton("시간 구입 (5 포인트)", (dialog, which) -> purchaseTime());
         }
 
         gameOverDialog = builder.create();
