@@ -46,6 +46,10 @@
             android:name=".RegisterActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".MyInformActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
