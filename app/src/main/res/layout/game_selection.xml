@@ -110,7 +110,7 @@
                     android:contentDescription="반대말 찾기 창으로 가는 버튼"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/opoosite_select"
+                    android:background="@drawable/opposite_select"
                     android:clipChildren="false"
                     android:clipToPadding="false"
                     android:orientation="vertical"
