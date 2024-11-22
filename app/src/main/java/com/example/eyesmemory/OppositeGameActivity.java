@@ -2,6 +2,7 @@ package com.example.eyesmemory;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -53,6 +54,8 @@ public class OppositeGameActivity extends AppCompatActivity {
     private int questionCount = 0;
     private AlertDialog gameOverDialog;
     private boolean isGameOver = false;
+    private MediaPlayer correctSound;
+    private MediaPlayer wrongSound;
 
     private final long BLINK_DETECTION_DELAY = 200; // 딜레이 설정
     private final float CLOSED_THRESHOLD = 0.245f; // 눈 감은 것으로 간주하는 임계값
@@ -88,6 +91,10 @@ public class OppositeGameActivity extends AppCompatActivity {
         displayNextWords();
         updateProblemSetHighlight();
         startTimer(remainingTime);
+
+        // 사운드 초기화
+        correctSound = MediaPlayer.create(this, R.raw.correct_answer);
+        wrongSound = MediaPlayer.create(this, R.raw.wrong_answer);
     }
 
     private void initializeViews() {
@@ -271,10 +278,18 @@ public class OppositeGameActivity extends AppCompatActivity {
         if (selectedAnswer.equals(correctAnswer)) {
             score++;
             Toast.makeText(this, "정답입니다!", Toast.LENGTH_SHORT).show();
+            // 정답일 때 사운드 재생
+            if (correctSound != null) {
+                correctSound.start();
+            }
         } else {
             heartCount--;
             updateLivesDisplay();
             Toast.makeText(this, "틀렸습니다. 정답은 " + correctAnswer + "입니다.", Toast.LENGTH_SHORT).show();
+            // 틀렸을 때 사운드 재생
+            if (wrongSound != null) {
+                wrongSound.start();
+            }
             if (heartCount <= 0) {
                 showGameOverDialog();
                 return;
@@ -349,6 +364,15 @@ public class OppositeGameActivity extends AppCompatActivity {
         super.onDestroy();
         if (countDownTimer != null) {
             countDownTimer.cancel();
+        }
+        // MediaPlayer 리소스 해제
+        if (correctSound != null) {
+            correctSound.release();
+            correctSound = null;
+        }
+        if (wrongSound != null) {
+            wrongSound.release();
+            wrongSound = null;
         }
     }
 

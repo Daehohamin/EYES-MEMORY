@@ -2,6 +2,7 @@ package com.example.eyesmemory;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -53,6 +54,9 @@ public class ChooseColorActivity extends AppCompatActivity {
     private int[] colorValues = {Color.BLACK, Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.rgb(255, 165, 0), Color.MAGENTA, Color.CYAN};
 
     private ImageButton colorButton1, colorButton2, colorButton3, pauseButton, questionButton;
+
+    private MediaPlayer correctSound;
+    private MediaPlayer wrongSound;
 
     private GazePathView gazePathView;
     private GazeTrackerManager gazeTrackerManager;
@@ -121,6 +125,10 @@ public class ChooseColorActivity extends AppCompatActivity {
         colorButton3.setOnClickListener(v -> checkAnswer((String) colorButton3.getTag()));
         pauseButton.setOnClickListener(v -> showPauseScreen());
         questionButton.setOnClickListener(v -> showGameExplanationDialog());
+
+        // 사운드 초기화
+        correctSound = MediaPlayer.create(this, R.raw.correct_answer);
+        wrongSound = MediaPlayer.create(this, R.raw.wrong_answer);
     }
 
     private void startGame() {
@@ -200,11 +208,19 @@ public class ChooseColorActivity extends AppCompatActivity {
     private void checkAnswer(String color) {
         if (correctColor.equals(color)) {
             questionCount++;
+            // 정답일 때 사운드 재생
+            if (correctSound != null) {
+                correctSound.start();
+            }
             startGame();
         } else {
             heartCount--;
             score--;
             updateHearts();
+            // 틀렸을 때 사운드 재생
+            if (wrongSound != null) {
+                wrongSound.start();
+            }
             if (heartCount == 0) {
                 showEndDialog("목숨을 모두 잃었습니다. 목숨을 구입하시겠습니까?");
             } else {
@@ -465,5 +481,4 @@ public class ChooseColorActivity extends AppCompatActivity {
             }
         }
     }
-
 }
