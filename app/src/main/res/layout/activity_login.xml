@@ -69,6 +69,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="아이디를 입력하세요"
+                            android:textColorHint="#666666"
                             android:textColor="@color/black"
                             android:inputType="text"
                             android:padding="10dp" />
@@ -89,6 +90,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="비밀번호를 입력하세요"
+                            android:textColorHint="#666666"
                             android:textColor="@color/black"
                             android:inputType="textPassword"
                             android:padding="10dp" />

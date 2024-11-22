@@ -5,6 +5,7 @@
     android:id="@+id/b"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".MainActivity">
 
     <Button
@@ -32,6 +33,7 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="30dp"
         android:text="로그인"
+        android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -47,6 +49,7 @@
         android:background="@drawable/cr10b1c6cc2"
         android:text="두뇌 게임"
         android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:textSize="20sp"
         app:layout_constraintWidth_percent="0.35"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,6 +65,7 @@
         android:drawableTop="@drawable/material_symbols_exercise"
         android:drawablePadding="8dp"
         android:text="체조"
+        android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:textSize="20sp"
         app:layout_constraintWidth_percent="0.35"
