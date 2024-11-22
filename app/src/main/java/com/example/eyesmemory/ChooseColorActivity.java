@@ -235,9 +235,8 @@ public class ChooseColorActivity extends AppCompatActivity {
 
         if (heartCount <= 0) {
             builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
-        }else{
+        }else if(remainingTime==0){
             builder.setNeutralButton("시간 구입 (5 포인트)", (dialog, which) -> purchaseTime());
-
         }
 
         builder.show();
