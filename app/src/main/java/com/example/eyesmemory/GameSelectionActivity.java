@@ -287,11 +287,9 @@ public class GameSelectionActivity extends AppCompatActivity {
 
         // 반대말 찾기 게임으로 이동하는 버튼 동작 설정
         oppositeSelectButton.setOnClickListener(v -> {
-            if (startCalibration()) {
-                startTracking();
-                mode = 2; // 반대말 찾기 게임 선택
-                setCalibration();
-            }
+            mode = 2; // 반대말 찾기 게임 선택
+            Intent intent = new Intent(GameSelectionActivity.this, OppositeGameActivity.class);
+            startActivity(intent);
         });
 
         hideProgress();
@@ -471,9 +469,6 @@ public class GameSelectionActivity extends AppCompatActivity {
             if (mode == 1) {
                 Intent intent = new Intent(GameSelectionActivity.this, ChooseColorActivity.class);
                 startActivity(intent);
-            } else if (mode == 2) {
-                Intent intent = new Intent(GameSelectionActivity.this, OppositeGameActivity.class);
-                startActivity(intent);
             }
         }
     };
@@ -569,16 +564,16 @@ public class GameSelectionActivity extends AppCompatActivity {
                 showToast("빨간 점을 바라보세요", false);
                 break;
             case FAIL_DOING_CALIBRATION:
-                speakOut("시선 교정 중입니다. 잠시만 기다려주세요.");
-                showToast("시선 교정 중입니다.", false);
+                speakOut("빨간 점을 바라보세요");
+                showToast("빨간 점을 바라보세요", false);
                 break;
             case FAIL_NO_CALIBRATION_DATA:
-                speakOut("교정 데이터가 없습니다. 다시 시도해주세요.");
-                showToast("교정 데이터가 없습니다.", true);
+                speakOut("빨간 점을 바라보세요");
+                showToast("빨간 점을 바라보세요", true);
                 break;
             case FAIL_HAS_NO_TRACKER:
-                speakOut("시선 추적기가 초기화되지 않았습니다.");
-                showToast("시선 추적기가 초기화되지 않았습니다.", true);
+                speakOut("빨간 점을 바라보세요");
+                showToast("빨간 점을 바라보세요", true);
                 break;
         }
         setViewAtGazeTrackerState();

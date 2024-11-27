@@ -50,6 +50,37 @@
             android:name=".MyInformActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ExerciseSelectionActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".HandsUpMotionCountActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".LeftHandUpMotionCountActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".RightHandUpMotionCountActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".SquatMotionCountActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".ExerciseEndActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Dialog">
+        </activity>
+
     </application>
 
 </manifest>

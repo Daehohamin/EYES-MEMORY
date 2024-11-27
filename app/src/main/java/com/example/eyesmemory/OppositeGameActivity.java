@@ -2,11 +2,19 @@ package com.example.eyesmemory;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,11 +41,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import camp.visual.gazetracker.callback.UserStatusCallback;
 
 public class OppositeGameActivity extends AppCompatActivity {
-    private TextView wordTextView1, wordTextView2, wordTextView3;
+    private TextView wordTextView1, wordTextView2, wordTextView3, infoText;
     private TextView option1Button1, option2Button1, option1Button2, option2Button2, option1Button3, option2Button3, timeView;
-    private LinearLayout option1Layout1, option2Layout1, option1Layout2, option2Layout2, option1Layout3, option2Layout3;
+    private LinearLayout wordLayout1, wordLayout2, wordLayout3, option1Layout1, option2Layout1, option1Layout2, option2Layout2, option1Layout3, option2Layout3;
     private ImageButton pauseButton, faqButton;
-    private ImageView life1ImageView, life2ImageView, life3ImageView;
+    private ImageView life1ImageView, life2ImageView, life3ImageView, leftEyeImageView, rightEyeImageView;
     private List<WordPair> wordList;
     private int currentWordIndex = 0;
     private static final int WORDS_PER_GAME = 9;
@@ -68,6 +76,8 @@ public class OppositeGameActivity extends AppCompatActivity {
     private boolean isRightEyeLastClosed = false;
     private boolean bothEyesClosed = false; // 양쪽 눈이 동시에 감겼는지 추적
 
+    private int leftEyeFillCount;
+    private int rightEyeFillCount;
 
     private GazeTrackerManager gazeTrackerManager;
 
@@ -77,6 +87,7 @@ public class OppositeGameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_opposite_game);
 
         initializeViews();
+        updateLayoutSize();
         setupClickListeners();
 
         gazeTrackerManager = GazeTrackerManager.getInstance();
@@ -101,6 +112,11 @@ public class OppositeGameActivity extends AppCompatActivity {
         wordTextView1 = findViewById(R.id.wordTextView1);
         wordTextView2 = findViewById(R.id.wordTextView2);
         wordTextView3 = findViewById(R.id.wordTextView3);
+        infoText = findViewById(R.id.info_text);
+
+        wordLayout1 = findViewById(R.id.wordLayout1);
+        wordLayout2 = findViewById(R.id.wordLayout2);
+        wordLayout3 = findViewById(R.id.wordLayout3);
 
         option1Button1 = findViewById(R.id.option1Button1);
         option2Button1 = findViewById(R.id.option2Button1);
@@ -128,8 +144,46 @@ public class OppositeGameActivity extends AppCompatActivity {
         problemSet3 = findViewById(R.id.problemSet3);
 
         timeView = findViewById(R.id.time_view);
+
+        leftEyeImageView = findViewById(R.id.img_left_eye);
+        rightEyeImageView = findViewById(R.id.img_right_eye);
     }
 
+    private void updateLayoutSize() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+
+        int width = (int)(Math.min(screenWidth * 0.25, (screenHeight - dpToPx(200)) * 0.2) * 0.9);
+        width = Math.max(width, dpToPx(88));
+
+        int height = (int)(Math.min(screenWidth * 0.25, (screenHeight - dpToPx(200)) * 0.2) * 0.9);
+        height = Math.max(height, dpToPx(88));
+
+        float scale = width / (float)dpToPx(98) * 0.9f;
+        TextView[] textViews = new TextView[] {
+                wordTextView1, wordTextView2, wordTextView3,
+                option1Button1, option1Button2, option1Button3,
+                option2Button1, option2Button2, option2Button3
+        };
+        for (TextView textView : textViews) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize() * scale);
+        }
+
+        View[] layouts = new View[] {
+                wordLayout1, wordLayout2, wordLayout3,
+                option1Layout1, option1Layout2, option1Layout3,
+                option2Layout1, option2Layout2, option2Layout3
+        };
+        for (View layout : layouts) {
+            ViewGroup.LayoutParams param = layout.getLayoutParams();
+            param.height = height;
+            param.width = width;
+            layout.setLayoutParams(param);
+        }
+    }
 
     private void setupClickListeners() {
         View.OnClickListener optionClickListener = this::handleOptionClick;
@@ -146,6 +200,8 @@ public class OppositeGameActivity extends AppCompatActivity {
     }
 
     private void handleOptionClick(View view) {
+        clearFillButton();
+
         LinearLayout selectedLayout = (LinearLayout) view;
         TextView selectedTextView = (TextView) selectedLayout.getChildAt(0);
         String selectedAnswer = selectedTextView.getText().toString();
@@ -259,6 +315,51 @@ public class OppositeGameActivity extends AppCompatActivity {
         option2.setEnabled(enabled);
         option1.setAlpha(enabled ? 1.0f : 0.5f);
         option2.setAlpha(enabled ? 1.0f : 0.5f);
+    }
+
+    private void clearFillButton() {
+        leftEyeFillCount = 0;
+        rightEyeFillCount = 0;
+        fillButton(0, true);
+        fillButton(0, false);
+    }
+
+
+    private void fillButton(float percentage, boolean isLeft) {
+        List<LinearLayout> buttons = isLeft
+                ? List.of(option1Layout1, option1Layout2, option1Layout3)
+                : List.of(option2Layout1, option2Layout2, option2Layout3);
+
+        int index = currentProblemIndex % 3;
+        LinearLayout button = buttons.get(index);
+
+        int buttonHeight = button.getHeight();
+
+        GradientDrawable whiteDrawable = new GradientDrawable();
+        whiteDrawable.setColor(0xFFFFFFFF);
+        whiteDrawable.setShape(GradientDrawable.RECTANGLE);
+        whiteDrawable.setCornerRadius(dpToPx(19));
+        whiteDrawable.setStroke(dpToPx(3), 0xFF1C6CC2);
+
+        GradientDrawable redDrawable = new GradientDrawable();
+        redDrawable.setColor(0xFFFF9E9E); // 붉은색
+        redDrawable.setShape(GradientDrawable.RECTANGLE);
+        redDrawable.setCornerRadius(dpToPx(19)); // 둥근 모서리
+        redDrawable.setStroke(dpToPx(3), 0xFF1C6CC2);
+
+        // ClipDrawable을 사용하여 빨간색 드로어블을 클리핑
+        ClipDrawable clipDrawable = new ClipDrawable(redDrawable, Gravity.BOTTOM, ClipDrawable.VERTICAL);
+        clipDrawable.setLevel((int) (percentage * 10000));
+
+        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{whiteDrawable, clipDrawable});
+
+        button.setBackground(layerDrawable);
+    }
+
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 
     private void checkAnswerByBlink(boolean isLeft) {
@@ -483,6 +584,8 @@ public class OppositeGameActivity extends AppCompatActivity {
         if (isGameOver) return;  // 이미 게임 오버 상태라면 다이얼로그를 다시 표시하지 않음
         isGameOver = true;
 
+        clearFillButton();
+
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
@@ -521,6 +624,7 @@ public class OppositeGameActivity extends AppCompatActivity {
     }
 
     private void restartGame() {
+        clearFillButton();
         Log.d("OppositeGameActivity", "restartGame called");
         if (gameOverDialog != null && gameOverDialog.isShowing()) {
             gameOverDialog.dismiss();
@@ -573,6 +677,7 @@ public class OppositeGameActivity extends AppCompatActivity {
             // 주의력 상태 처리
         }
 
+        private static final int CLICK_THRESHOLD = 2200;
 
         @Override
         public void onBlink(long timestamp,
@@ -581,53 +686,52 @@ public class OppositeGameActivity extends AppCompatActivity {
                             boolean isBlink,
                             float leftOpenness,
                             float rightOpenness) {
+            runOnUiThread(() -> {
+                String formatted1 = String.format("%010.5f", leftOpenness * 100);
+                String formatted2 = String.format("%010.5f", rightOpenness * 100);
+                infoText.setText(formatted1 + " " + formatted2);
+            });
+            if (isTimerPaused || isGameOver) return;
+            if (leftOpenness == -1 || rightOpenness == -1) return;
             if (timestamp - lastBlinkTime < BLINK_DETECTION_DELAY) return; // 연속 감지 방지
+            lastBlinkTime = timestamp;
 
             boolean isLeftEyeClosed = leftOpenness < CLOSED_THRESHOLD;
             boolean isRightEyeClosed = rightOpenness < CLOSED_THRESHOLD;
             boolean isLeftEyeOpen = leftOpenness > OPEN_THRESHOLD;
             boolean isRightEyeOpen = rightOpenness > OPEN_THRESHOLD;
 
-            float eyeOpennessDifference = Math.abs(leftOpenness - rightOpenness);
-
-            // 양쪽 눈이 거의 동일한 상태일 때
-            if (eyeOpennessDifference < MAX_EYE_DIFFERENCE) {
-                if (isLeftEyeClosed && isRightEyeClosed) {
-                    // 모두 감긴 경우
-                    bothEyesClosed = true;
-                    isLeftEyeLastClosed = false;
-                    isRightEyeLastClosed = false;
-                    return;
-                } else if (isLeftEyeOpen && isRightEyeOpen) {
-                    // 모두 열린 경우
-                    bothEyesClosed = false;
-                    isLeftEyeLastClosed = false;
-                    isRightEyeLastClosed = false;
-                    return;
+            runOnUiThread(() -> {
+                if (isLeftEyeOpen) {
+                    leftEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_black_48);
                 } else {
-                    // 양쪽 눈이 동일한 상태가 아닐 때는 아무 작업도 하지 않음
-                    return;
+                    leftEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_off_black_48);
+
+                    leftEyeFillCount++;
+                    float percentage = leftEyeFillCount / ((float)CLICK_THRESHOLD / BLINK_DETECTION_DELAY);
+                    fillButton(percentage, true);
+
+                    if (percentage >= 1.0) {
+                        clearFillButton();
+                        checkAnswerByBlink(true);
+                    }
                 }
-            }
 
-            if (bothEyesClosed) return;
+                if (isRightEyeOpen) {
+                    rightEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_black_48);
+                } else {
+                    rightEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_off_black_48);
 
-            // 왼쪽 눈이 감겼고 오른쪽 눈이 열려 있으며, 두 눈의 차이가 클 때만 왼쪽 버튼 클릭
-            if (isLeftEyeClosed && isRightEyeOpen && !isLeftEyeLastClosed &&
-                    eyeOpennessDifference >= MAX_EYE_DIFFERENCE) {
-                runOnUiThread(() -> checkAnswerByBlink(true));
-                lastBlinkTime = timestamp;
-                isLeftEyeLastClosed = true;
-                isRightEyeLastClosed = false;
-            }
-            // 오른쪽 눈이 감겼고 왼쪽 눈이 열려 있으며, 두 눈의 차이가 클 때만 오른쪽 버튼 클릭
-            else if (isRightEyeClosed && isLeftEyeOpen && !isRightEyeLastClosed &&
-                    eyeOpennessDifference >= MAX_EYE_DIFFERENCE) {
-                runOnUiThread(() -> checkAnswerByBlink(false));
-                lastBlinkTime = timestamp;
-                isRightEyeLastClosed = true;
-                isLeftEyeLastClosed = false;
-            }
+                    rightEyeFillCount++;
+                    float percentage = rightEyeFillCount / ((float)CLICK_THRESHOLD / BLINK_DETECTION_DELAY);
+                    fillButton(percentage, false);
+
+                    if (percentage >= 1.0) {
+                        clearFillButton();
+                        checkAnswerByBlink(false);
+                    }
+                }
+            });
         }
 
         @Override

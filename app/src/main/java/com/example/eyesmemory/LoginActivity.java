@@ -4,8 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import android.util.DisplayMetrics;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -36,6 +41,8 @@ public class LoginActivity extends AppCompatActivity {
         keepLoggedInCheckBox = binding.r8xy4ihly4wl;
         // 자동 로그인 확인
         checkAutoLogin();
+
+        updateLayoutSize();
     }
 
     private void checkAutoLogin() {
@@ -101,5 +108,63 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "데이터베이스 오류: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void updateLayoutSize() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+        float density = displayMetrics.density;
+
+        boolean isTablet = (screenWidth / density) >= 600;
+
+        if (!isTablet) {
+            // 폰에서는 기존 크기 그대로 (태블릿에서만 변경)
+            return;
+        }
+
+        TextView titleTextView = findViewById(R.id.logoText);
+        if (titleTextView != null) {
+            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+        }
+
+        ImageView logoImageView = findViewById(R.id.logoImage);
+        if (logoImageView != null) {
+            logoImageView.getLayoutParams().width = dpToPx(85);
+            logoImageView.getLayoutParams().height = dpToPx(85);
+            logoImageView.requestLayout();
+        }
+
+        int buttonWidth = (int) (Math.min(screenWidth * 0.9, screenHeight * 0.35));
+        int buttonHeight = (int) (buttonWidth * 0.3);
+
+        TextView loginTextView = binding.btnLogin.findViewById(R.id.rptjh0txs46q);
+        TextView registerTextView = binding.btnRegister;
+
+        if (loginTextView != null) {
+            loginTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(15) * buttonWidth / (float) dpToPx(250));
+        }
+        if (registerTextView != null) {
+            registerTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(15) * buttonWidth / (float) dpToPx(250));
+        }
+
+        int inputFieldHeight = buttonHeight / 2;
+        binding.inputId.getLayoutParams().height = inputFieldHeight;
+        binding.inputPw.getLayoutParams().height = inputFieldHeight;
+
+        binding.inputId.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(15) * buttonWidth / (float) dpToPx(250));
+        binding.inputPw.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(15) * buttonWidth / (float) dpToPx(250));
+
+        binding.btnLogin.requestLayout();
+        binding.btnRegister.requestLayout();
+        binding.inputId.requestLayout();
+        binding.inputPw.requestLayout();
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 }

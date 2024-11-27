@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.Toast;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+
+import android.util.DisplayMetrics;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,6 +44,48 @@ public class RegisterActivity extends AppCompatActivity {
         titleText.setText("회원가입");
 
         btn_signup.setOnClickListener(view -> registerUser());
+
+        updateLayoutSize(); // 태블릿에서만 조정
+    }
+
+    private void updateLayoutSize() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int screenWidth = displayMetrics.widthPixels;
+        float density = displayMetrics.density;
+
+        boolean isTablet = (screenWidth / density) >= 600;
+
+        if (!isTablet) {
+            // 폰 화면에서는 크기 조정하지 않음
+            return;
+        }
+
+        // 버튼 내부 텍스트 크기만 조정 (버튼 높이는 유지)
+        TextView buttonText = (TextView) btn_signup.getChildAt(0);
+        if (buttonText != null) {
+            buttonText.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(30));
+        }
+
+        int inputFieldHeight = register_id.getLayoutParams().height; // 기존 높이 유지
+        adjustEditTextSize(register_id, inputFieldHeight, 28); // 텍스트 크기만 조정
+        adjustEditTextSize(register_pw1, inputFieldHeight, 28);
+        adjustEditTextSize(register_pw2, inputFieldHeight, 28);
+        adjustEditTextSize(register_name, inputFieldHeight, 28);
+
+        btn_signup.requestLayout();
+    }
+
+    private void adjustEditTextSize(EditText editText, int height, int textSizeDp) {
+        editText.getLayoutParams().height = height;
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeDp);
+        editText.requestLayout();
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 
     private void registerUser() {

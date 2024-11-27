@@ -63,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnExercise.setOnClickListener(v -> {
-            Toast.makeText(this, "체조 기능은 아직 구현되지 않았습니다.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, ExerciseSelectionActivity.class);
+            startActivity(intent);
         });
 
         updateLoginLogoutButton();
