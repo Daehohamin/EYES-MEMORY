@@ -134,7 +134,9 @@ public class ChooseColorActivity extends AppCompatActivity {
     private void startGame() {
         if (questionCount < 10 && heartCount > 0) {
             generateQuestion();
-        } else if (heartCount > 0) {
+        } else if (remainingTime==0){
+            showEndDialog("시간이 모두 지났습니다.\n시간을 구입하시겠습니까?");
+        }else if (heartCount > 0) {
             updateUserPoints(10);
             showEndDialog("당신의 점수:" + score + "/10" +"\n획득한 포인트: +10p");
         } else {
@@ -153,7 +155,7 @@ public class ChooseColorActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                showEndDialog("시간초과!");
+                showEndDialog("시간이 초과되었습니다.\n시간을 구입하시겠습니까?");
             }
 
         }.start();
@@ -251,7 +253,7 @@ public class ChooseColorActivity extends AppCompatActivity {
 
         if (heartCount <= 0) {
             builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
-        }else if(remainingTime==0){
+        }else if(remainingTime<=1000){
             builder.setNeutralButton("시간 구입 (5 포인트)", (dialog, which) -> purchaseTime());
         }
 

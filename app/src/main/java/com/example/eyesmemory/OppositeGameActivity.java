@@ -615,7 +615,7 @@ public class OppositeGameActivity extends AppCompatActivity {
 
         if (heartCount <= 0) {
             builder.setNeutralButton("목숨 구입 (5 포인트)", (dialog, which) -> purchaseLife());
-        }else if(remainingTime==0){
+        }else if(remainingTime<=1000){
             builder.setNeutralButton("시간 구입 (5 포인트)", (dialog, which) -> purchaseTime());
         }
 
