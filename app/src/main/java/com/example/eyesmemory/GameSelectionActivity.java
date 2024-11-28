@@ -52,6 +52,7 @@ public class GameSelectionActivity extends AppCompatActivity {
 
     private ImageButton choosingSelectButton;
     private ImageButton oppositeSelectButton;
+    private ImageButton backButton;
     private TextView pointText;
 
     private GazeTrackerManager gazeTrackerManager;
@@ -99,6 +100,11 @@ public class GameSelectionActivity extends AppCompatActivity {
 
         // 뷰 초기화
         initView();
+
+        backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> finish());
+
+
         checkPermission();
         initHandler();
 

@@ -28,6 +28,7 @@ public class ExerciseSelectionActivity extends AppCompatActivity {
     private ImageButton leftHandUpSelectButton;
     private ImageButton rightHandUpSelectButton;
     private ImageButton squatSelectButton;
+    private ImageButton backButton;
 
     private TextToSpeech tts;
 
@@ -56,6 +57,9 @@ public class ExerciseSelectionActivity extends AppCompatActivity {
 
         // 뷰 초기화
         initView();
+        backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> finish());
+
         checkPermission();
 
 
