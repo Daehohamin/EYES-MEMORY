@@ -66,14 +66,7 @@ public class OppositeGameActivity extends AppCompatActivity {
     private MediaPlayer wrongSound;
 
     private final long BLINK_DETECTION_DELAY = 200; // 딜레이 설정
-    private final float CLOSED_THRESHOLD = 0.245f; // 눈 감은 것으로 간주하는 임계값
-    private final float OPEN_THRESHOLD = 0.55f;   // 눈 뜬 것으로 간주하는 임계값
-    private final float MAX_EYE_DIFFERENCE = 0.255f;
-    // 두 눈의 openness 차이가 이 값보다 작으면 양쪽 눈이 같은 상태로 간주
-    private long lastBlinkTime = 0;
-    // 마지막으로 감지된 상태를 기록해 중복 클릭 방지
-    private boolean isLeftEyeLastClosed = false;
-    private boolean isRightEyeLastClosed = false;
+    private long lastBlinkTime = 0; // 마지막으로 감지된 상태를 기록해 중복 클릭 방지
     private boolean bothEyesClosed = false; // 양쪽 눈이 동시에 감겼는지 추적
 
     private int leftEyeFillCount;
@@ -677,7 +670,7 @@ public class OppositeGameActivity extends AppCompatActivity {
             // 주의력 상태 처리
         }
 
-        private static final int CLICK_THRESHOLD = 2500;
+        private static final int CLICK_THRESHOLD = 2400;
 
         @Override
         public void onBlink(long timestamp,
@@ -686,53 +679,55 @@ public class OppositeGameActivity extends AppCompatActivity {
                             boolean isBlink,
                             float leftOpenness,
                             float rightOpenness) {
-            runOnUiThread(() -> {
-                String formatted1 = String.format("%010.5f", leftOpenness * 100);
-                String formatted2 = String.format("%010.5f", rightOpenness * 100);
-                infoText.setText(formatted1 + " " + formatted2);
-            });
             if (isTimerPaused || isGameOver) return;
-            if (leftOpenness == -1 || rightOpenness == -1) return;
-            if (timestamp - lastBlinkTime < BLINK_DETECTION_DELAY) return; // 연속 감지 방지
+            if (timestamp - lastBlinkTime < BLINK_DETECTION_DELAY) return;
             lastBlinkTime = timestamp;
 
-            boolean isLeftEyeClosed = leftOpenness < CLOSED_THRESHOLD;
-            boolean isRightEyeClosed = rightOpenness < CLOSED_THRESHOLD;
-            boolean isLeftEyeOpen = leftOpenness > OPEN_THRESHOLD;
-            boolean isRightEyeOpen = rightOpenness > OPEN_THRESHOLD;
-
             runOnUiThread(() -> {
-                if (isLeftEyeOpen) {
-                    leftEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_black_48);
+                // 양쪽 눈 상태 처리
+                if (isBlinkLeft && isBlinkRight) {
+                    bothEyesClosed = true;
+                    leftEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_off_black_48);
+                    rightEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_off_black_48);
+                    return;
                 } else {
+                    bothEyesClosed = false;
+                }
+
+                // 왼쪽 눈 상태 처리
+                if (isBlinkLeft) {
                     leftEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_off_black_48);
 
                     leftEyeFillCount++;
-                    float percentage = leftEyeFillCount / ((float)CLICK_THRESHOLD / BLINK_DETECTION_DELAY);
+                    float percentage = leftEyeFillCount / ((float) CLICK_THRESHOLD / BLINK_DETECTION_DELAY);
                     fillButton(percentage, true);
 
                     if (percentage >= 1.0) {
                         clearFillButton();
-                        checkAnswerByBlink(true);
+                        checkAnswerByBlink(true); // 왼쪽 눈으로 버튼 클릭 처리
                     }
+                } else {
+                    leftEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_black_48);
                 }
 
-                if (isRightEyeOpen) {
-                    rightEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_black_48);
-                } else {
+                // 오른쪽 눈 상태 처리
+                if (isBlinkRight) {
                     rightEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_off_black_48);
 
                     rightEyeFillCount++;
-                    float percentage = rightEyeFillCount / ((float)CLICK_THRESHOLD / BLINK_DETECTION_DELAY);
+                    float percentage = rightEyeFillCount / ((float) CLICK_THRESHOLD / BLINK_DETECTION_DELAY);
                     fillButton(percentage, false);
 
                     if (percentage >= 1.0) {
                         clearFillButton();
-                        checkAnswerByBlink(false);
+                        checkAnswerByBlink(false); // 오른쪽 눈으로 버튼 클릭 처리
                     }
+                } else {
+                    rightEyeImageView.setImageResource(visual.camp.sample.view.R.drawable.baseline_visibility_black_48);
                 }
             });
         }
+
 
         @Override
         public void onDrowsiness(long timestamp, boolean isDrowsiness, float intensity) {
