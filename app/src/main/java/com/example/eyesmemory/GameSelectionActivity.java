@@ -102,12 +102,14 @@ public class GameSelectionActivity extends AppCompatActivity {
         initView();
 
         backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> finish());
-
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(GameSelectionActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
         checkPermission();
         initHandler();
-
 
 
         // Firestore 초기화
@@ -123,6 +125,14 @@ public class GameSelectionActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "User ID not set");
         }
+    }
+
+    @SuppressWarnings("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(GameSelectionActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     // Firestore에서 사용자 포인트를 가져오는 메서드

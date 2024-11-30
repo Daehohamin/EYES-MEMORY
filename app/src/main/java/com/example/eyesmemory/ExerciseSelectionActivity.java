@@ -58,7 +58,11 @@ public class ExerciseSelectionActivity extends AppCompatActivity {
         // 뷰 초기화
         initView();
         backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ExerciseSelectionActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
         checkPermission();
 
@@ -76,6 +80,14 @@ public class ExerciseSelectionActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "User ID not set");
         }
+    }
+
+    @SuppressWarnings("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ExerciseSelectionActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     // 뷰 초기화
