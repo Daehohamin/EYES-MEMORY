@@ -677,7 +677,7 @@ public class OppositeGameActivity extends AppCompatActivity {
             // 주의력 상태 처리
         }
 
-        private static final int CLICK_THRESHOLD = 2200;
+        private static final int CLICK_THRESHOLD = 2500;
 
         @Override
         public void onBlink(long timestamp,

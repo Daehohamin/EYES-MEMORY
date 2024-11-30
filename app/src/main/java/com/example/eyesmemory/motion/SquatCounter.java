@@ -14,11 +14,11 @@ public class SquatCounter implements MotionCounter {
     private OnCountListener listener;
 
     // 스쿼트 판단+ 엉덩이 위치 임계값
-    private static final float SQUAT_THRESHOLD = 105f;  // 엉덩이가 이만큼 내려가면 스쿼트로 판단
+    private static final float SQUAT_THRESHOLD = 110f;
 
     // 팔 위치 판단을 위한 임계값
-    private static final float ARM_ANGLE_TARGET = 80f;    // 척추와 팔 사이의 목표 각도
-    private static final float MAX_ARM_DEVIATION = 55f;   // 각도의 허용 오차
+    private static final float ARM_ANGLE_TARGET = 80f;  // 척추와 팔 사이의 목표 각도
+    private static final float MAX_ARM_DEVIATION = 45f; // 각도의 허용 오차
 
     public SquatCounter(int maxCount) {
         this.maxCount = maxCount;
