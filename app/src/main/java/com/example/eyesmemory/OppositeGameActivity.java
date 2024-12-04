@@ -57,7 +57,7 @@ public class OppositeGameActivity extends AppCompatActivity {
     private LinearLayout problemSet1, problemSet2, problemSet3;
     private int currentProblemIndex = 0;
     private CountDownTimer countDownTimer;
-    private long remainingTime = 60000; // 60 seconds
+    private long remainingTime = 120000; // 60 seconds
     private boolean isTimerPaused = false;
     private int questionCount = 0;
     private AlertDialog gameOverDialog;

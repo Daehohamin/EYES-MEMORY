@@ -44,7 +44,7 @@ public class ChooseColorActivity extends AppCompatActivity {
     private int questionCount = 0;
     private String correctColor;
     private CountDownTimer countDownTimer;
-    private long remainingTime = 60000; // 초기 타이머 값 (1분)
+    private long remainingTime = 120000; // 초기 타이머 값 (2분)
     private boolean isTimerPaused = false;
     private FirebaseFirestore db;
     private String currentUserId;
