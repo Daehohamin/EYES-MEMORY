@@ -559,7 +559,7 @@ public class GameSelectionActivity extends AppCompatActivity {
     private boolean startCalibration() {
         boolean isSuccess = gazeTrackerManager.startCalibration(CalibrationModeType.FIVE_POINT, AccuracyCriteria.DEFAULT);
         if (!isSuccess) {
-            showToast("시선 교정 시작 실패", false);
+            showToast("빨간 점을 바라보세요", false);
         }
         setViewAtGazeTrackerState();
         return isSuccess;
